@@ -12,8 +12,6 @@ pub fn get_combinations(n_words: usize) -> Vec<Vec<usize>> {
         set_remaining_options(n_words, 1, ordering, &mut orderings);
     }
 
-    println!("{:#?}", orderings);
-
     return orderings;
 }
 
