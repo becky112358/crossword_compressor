@@ -29,6 +29,27 @@ impl Crossword {
         return (min, max);
     }
 
+    pub fn clone_shrink(&self) -> Crossword {
+        let x_size = self.right_edge - self.left_edge + 1;
+        let y_size = self.lower_edge - self.upper_edge + 1;
+
+        let mut other = Crossword {
+            right_edge: x_size - 1,
+            upper_edge: 0,
+            left_edge: 0,
+            lower_edge: y_size - 1,
+            letters: vec![vec![EMPTY; y_size]; x_size],
+        };
+
+        for x_index in self.left_edge..=self.right_edge {
+            for y_index in self.upper_edge..=self.lower_edge {
+                other.letters[x_index-self.left_edge][y_index-self.upper_edge] = self.letters[x_index][y_index];
+            }
+        }
+
+        return other;
+    }
+
     pub fn print(&self) {
         for y in self.upper_edge..=self.lower_edge {
             for x in self.left_edge..=self.right_edge {

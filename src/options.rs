@@ -237,7 +237,7 @@ fn add_crossword(comparison: Comparison, crossword: &Crossword, best_crosswords:
     }
 
     match comparison {
-        Comparison::First | Comparison::Better | Comparison::AsGood => best_crosswords.push(crossword.clone()),
+        Comparison::First | Comparison::Better | Comparison::AsGood => best_crosswords.push(crossword.clone_shrink()),
         Comparison::Worse => (),
     }
 }
