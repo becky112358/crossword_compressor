@@ -1,11 +1,10 @@
 
 mod combinations;
 use crate::combinations::get_combinations;
-mod common;
 mod crossword;
 use crate::crossword::initialise_crossword;
 mod letter_map;
-use crate::letter_map::{create_word_usages, get_letter_map};
+use crate::letter_map::get_letter_map;
 mod options;
 use crate::options::compare_options;
 
@@ -24,15 +23,16 @@ fn main() {
     ];
 
     let combinations = get_combinations(5);
-    let mut word_usages = create_word_usages(&words);
-    let mut letter_map = get_letter_map(&mut word_usages);
+    let mut letter_map = get_letter_map(&words);
 
     let mut crossword = initialise_crossword(&words, "beginning");
 
-//    let best_options = compare_options(&mut letter_map, &mut crossword);
+    let mut words_in_crossword = vec![false; words.len()];
+    let mut best_options = vec![];
+    compare_options(&words, &letter_map, &mut words_in_crossword, &mut crossword, &mut best_options);
 
-//    for crossword in best_options {
-//        crossword.print();
-//    }
+    for crossword in best_options {
+        crossword.print();
+    }
 }
 

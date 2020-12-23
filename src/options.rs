@@ -1,7 +1,6 @@
 
 use std::collections::HashMap;
 
-use crate::common::WordUsage;
 use crate::crossword::{Crossword, EMPTY};
 
 #[derive(PartialEq)]
@@ -11,32 +10,34 @@ enum Direction {
     NotCrossable
 }
 
-pub fn compare_options<'a>(words: &mut HashMap<char, Vec<&'a mut WordUsage<'a>>>, crossword: &mut Crossword) -> Vec<Crossword> {
-
-    let mut best_crosswords;
+pub fn compare_options(
+    words: &Vec<&str>,
+    letter_map: &HashMap<char, Vec<usize>>,
+    mut words_in_crossword: &mut Vec<bool>,
+    crossword: &mut Crossword,
+    best_crosswords: &mut Vec<Crossword>) {
 
     for y_index in crossword.upper_edge..=crossword.lower_edge {
         for x_index in crossword.left_edge..=crossword.right_edge {
             let direction = is_crossable_letter(crossword, x_index, y_index);
             if direction != Direction::NotCrossable {
-                let available_words = get_available_words(crossword.letters[x_index][y_index], words);
+                let available_words = get_available_words(crossword.letters[x_index][y_index], letter_map, words_in_crossword);
                 if available_words.len() > 0 {
-                    for mut word in available_words {
-                        if insert_word(x_index, y_index, &direction, &mut word, crossword) {
-                            if remaining_available_words(words) {
-                                best_crosswords = compare_options(words, crossword);
+                    for word_index in available_words {
+                        let word = words[word_index];
+                        if insert_word(x_index, y_index, &direction, word_index, &word, &mut words_in_crossword, crossword) {
+                            if words_in_crossword.contains(&false) {
+                                compare_options(words, letter_map, words_in_crossword, crossword, best_crosswords);
                             } else {
-                                compare_crosswords(crossword, &mut best_crosswords);
+                                compare_crosswords(crossword, best_crosswords);
                             }
-                            remove_word(x_index, y_index, &direction, &mut word, crossword);
+                            remove_word(x_index, y_index, &direction, word_index, &word, &mut words_in_crossword, crossword);
                         }
                     }
                 }
             }
         }
     }
-
-    return best_crosswords;
 }
 
 fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) -> Direction {
@@ -57,18 +58,15 @@ fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) ->
     return direction;
 }
 
-fn get_available_words<'a>(
-    letter: char,
-    words: &HashMap<char,
-    Vec<&'a mut WordUsage<'a>>>) -> Vec<&'a mut WordUsage<'a>> {
+fn get_available_words(letter: char, words: &HashMap<char, Vec<usize>>, words_in_crossword: &Vec<bool>) -> Vec<usize> {
 
     let mut available_words = Vec::new();
 
     match words.get(&letter) {
-        Some(word_usages) => {
-            for word in word_usages {
-                if !word.currently_in_use {
-                    available_words.push(*word);
+        Some(words_containing_letter) => {
+            for word_index in words_containing_letter {
+                if !words_in_crossword[*word_index] {
+                    available_words.push(*word_index);
                 }
             }
         }
@@ -82,24 +80,26 @@ fn insert_word(
     x_index: usize,
     y_index: usize,
     direction: &Direction,
-    word: &mut WordUsage,
+    word_index: usize,
+    word: &str,
+    words_in_crossword: &mut Vec<bool>,
     crossword: &mut Crossword) -> bool {
 
     // TODO FULL of duplication!!
     let mut insertable = true;
 
     let cross_letter = crossword.letters[x_index][y_index];
-    let cross_index;
+    let mut cross_index = 0;
 
-    for (index, letter) in word.word.chars().enumerate() {
+    for (index, letter) in word.chars().enumerate() {
         if letter == cross_letter {
             cross_index = index;
             break;
         }
     }
 
-    let length_after = word.word.len() - cross_index - 1;
-    let length_before = word.word.len() - length_after - 1;
+    let length_after = word.len() - cross_index - 1;
+    let length_before = word.len() - length_after - 1;
 
     if *direction == Direction::Across {
         if x_index - length_before < 0 {
@@ -163,7 +163,7 @@ fn insert_word(
 
     if insertable && *direction == Direction::Across {
         let mut x_index_current = x_index - length_before;
-        for letter in word.word.chars() {
+        for letter in word.chars() {
             if crossword.letters[x_index_current][y_index] != EMPTY
                 && crossword.letters[x_index_current][y_index] != letter {
                 insertable = false;
@@ -173,7 +173,7 @@ fn insert_word(
         }
     } else if insertable && *direction == Direction::Down {
         let mut y_index_current = y_index - length_before;
-        for letter in word.word.chars() {
+        for letter in word.chars() {
             if crossword.letters[x_index][y_index_current] != EMPTY
                 && crossword.letters[x_index][y_index_current] != letter {
                 insertable = false;
@@ -185,20 +185,20 @@ fn insert_word(
 
     if insertable && *direction == Direction::Across {
         let mut x_index_current = x_index - length_before;
-        for letter in word.word.chars() {
+        for letter in word.chars() {
             crossword.letters[x_index_current][y_index] = letter;
             x_index_current += 1;
         }
     } else if insertable && *direction == Direction::Down {
         let mut y_index_current = y_index - length_before;
-        for letter in word.word.chars() {
+        for letter in word.chars() {
             crossword.letters[x_index][y_index_current] = letter;
             y_index_current += 1;
         }
     }
 
     if insertable {
-        word.currently_in_use = true;
+        words_in_crossword[word_index] = true;
 
         if *direction == Direction::Across {
             if x_index - length_before < crossword.left_edge {
@@ -218,21 +218,6 @@ fn insert_word(
     }
 
     return insertable;
-}
-
-fn remaining_available_words(words: &HashMap<char, Vec<&mut WordUsage>>) -> bool {
-    let mut remaining_available = false;
-
-    for (_, word_usage_vec) in words {
-        for word in word_usage_vec {
-            if !word.currently_in_use {
-                remaining_available = true;
-                break;
-            }
-        }
-    }
-
-    return remaining_available;
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &mut Vec<Crossword>) {
@@ -256,15 +241,22 @@ fn compare_crosswords(crossword: &Crossword, best_crosswords: &mut Vec<Crossword
     }
 }
 
-fn remove_word(x_index: usize, y_index: usize, direction: &Direction, word: &mut WordUsage, crossword: &mut Crossword) {
+fn remove_word(
+    x_index: usize,
+    y_index: usize,
+    direction: &Direction,
+    word_index: usize,
+    word: &str,
+    words_in_crossword: &mut Vec<bool>,
+    crossword: &mut Crossword) {
 
     // TODO Duplicate!!
     // Will move this into 'get_available_words', so that word containing the relevant letter multiple times
     // are considered for each letter.
     let cross_letter = crossword.letters[x_index][y_index];
-    let cross_index;
+    let mut cross_index = 0;
 
-    for (index, letter) in word.word.chars().enumerate() {
+    for (index, letter) in word.chars().enumerate() {
         if letter == cross_letter {
             cross_index = index;
             break;
@@ -273,8 +265,8 @@ fn remove_word(x_index: usize, y_index: usize, direction: &Direction, word: &mut
 
     // TODO FULL of duplication!!
 
-    let length_after = word.word.len() - cross_index - 1;
-    let length_before = word.word.len() - length_after - 1;
+    let length_after = word.len() - cross_index - 1;
+    let length_before = word.len() - length_after - 1;
 
     if *direction == Direction::Across {
         for x in x_index-length_before..=x_index+length_after {
@@ -365,5 +357,7 @@ fn remove_word(x_index: usize, y_index: usize, direction: &Direction, word: &mut
             }
         }
     }
+
+    words_in_crossword[word_index] = false;
 }
 
