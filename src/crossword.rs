@@ -1,15 +1,34 @@
 
-const EMPTY: char = '#';
+pub const EMPTY: char = '#';
 
+#[derive(Clone)]
 pub struct Crossword {
-    pub left_edge: usize,
-    pub upper_edge: usize,
     pub right_edge: usize,
+    pub upper_edge: usize,
+    pub left_edge: usize,
     pub lower_edge: usize,
     pub letters: Vec<Vec<char>>,
 }
 
 impl Crossword {
+    pub fn get_min_max(&self) -> (usize, usize) {
+        let x_len = self.right_edge - self.left_edge + 1;
+        let y_len = self.lower_edge - self.upper_edge + 1;
+
+        let min;
+        let max;
+
+        if x_len < y_len {
+            min = x_len;
+            max = y_len;
+        } else {
+            min = y_len;
+            max = x_len;
+        }
+
+        return (min, max);
+    }
+
     pub fn print(&self) {
         for y in self.upper_edge..=self.lower_edge {
             for x in self.left_edge..=self.right_edge {
