@@ -21,7 +21,7 @@ fn main() {
 
     let mut words_in_crossword = vec![false; words.len()];
     let mut best_options = vec![];
-    compare_options(&words, &letter_map, &mut words_in_crossword, &mut crossword, &mut best_options);
+    compare_options(&letter_map, &mut words_in_crossword, &mut crossword, &mut best_options);
 
     for crossword in &best_options {
         crossword.print();

@@ -20,7 +20,6 @@ enum Comparison {
 }
 
 pub fn compare_options(
-    words: &Vec<&str>,
     letter_map: &HashMap<char, Vec<WordAndLetter>>,
     mut words_in_crossword: &mut Vec<bool>,
     crossword: &mut Crossword,
@@ -38,7 +37,7 @@ pub fn compare_options(
                                 let crossword_status = compare_crosswords(crossword, best_crosswords);
                                 if crossword_status == Comparison::Worse {
                                 } else if words_in_crossword.contains(&false) {
-                                    compare_options(words, letter_map, words_in_crossword, crossword, best_crosswords);
+                                    compare_options(letter_map, words_in_crossword, crossword, best_crosswords);
                                 } else {
                                     add_crossword(crossword_status, crossword, best_crosswords);
                                 }
