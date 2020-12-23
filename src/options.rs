@@ -28,25 +28,23 @@ pub fn compare_options(
     for y_index in crossword.upper_edge..=crossword.lower_edge {
         for x_index in crossword.left_edge..=crossword.right_edge {
             let direction = is_crossable_letter(crossword, x_index, y_index);
-            if direction != Direction::NotCrossable {
-                let crossable_words = letter_map.get(&crossword.letters[x_index][y_index]);
-                match crossable_words {
-                    Some(crossable_words) => {
-                        for word_and_letter in crossable_words {
-                            if insert_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword) {
-                                let crossword_status = compare_crosswords(crossword, best_crosswords);
-                                if crossword_status == Comparison::Worse {
-                                } else if words_in_crossword.contains(&false) {
-                                    compare_options(letter_map, words_in_crossword, crossword, best_crosswords);
-                                } else {
-                                    add_crossword(crossword_status, crossword, best_crosswords);
-                                }
-                                remove_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword);
+            let crossable_words = letter_map.get(&crossword.letters[x_index][y_index]);
+            match crossable_words {
+                Some(crossable_words) => if direction != Direction::NotCrossable {
+                    for word_and_letter in crossable_words {
+                        if insert_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword) {
+                            let crossword_status = compare_crosswords(crossword, best_crosswords);
+                            if crossword_status == Comparison::Worse {
+                            } else if words_in_crossword.contains(&false) {
+                                compare_options(letter_map, words_in_crossword, crossword, best_crosswords);
+                            } else {
+                                add_crossword(crossword_status, crossword, best_crosswords);
                             }
+                            remove_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword);
                         }
-                    },
-                    None => (),
-                }
+                    }
+                },
+                None => (),
             }
         }
     }
