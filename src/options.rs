@@ -34,8 +34,7 @@ pub fn compare_options(
                 match crossable_words {
                     Some(crossable_words) => {
                         for word_and_letter in crossable_words {
-                            let word = words[word_and_letter.word_index];
-                            if insert_word(x_index, y_index, &direction, &word_and_letter, &word, &mut words_in_crossword, crossword) {
+                            if insert_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword) {
                                 let crossword_status = compare_crosswords(crossword, best_crosswords);
                                 if crossword_status == Comparison::Worse {
                                 } else if words_in_crossword.contains(&false) {
@@ -77,7 +76,6 @@ fn insert_word(
     y_index: usize,
     direction: &Direction,
     word_and_letter: &WordAndLetter,
-    word: &str,
     words_in_crossword: &mut Vec<bool>,
     crossword: &mut Crossword) -> bool {
 
@@ -148,7 +146,7 @@ fn insert_word(
 
     if insertable && *direction == Direction::Across {
         let mut x_index_current = x_index - word_and_letter.n_letters_before;
-        for letter in word.chars() {
+        for letter in word_and_letter.word.chars() {
             if crossword.letters[x_index_current][y_index] != EMPTY
                 && crossword.letters[x_index_current][y_index] != letter {
                 insertable = false;
@@ -158,7 +156,7 @@ fn insert_word(
         }
     } else if insertable && *direction == Direction::Down {
         let mut y_index_current = y_index - word_and_letter.n_letters_before;
-        for letter in word.chars() {
+        for letter in word_and_letter.word.chars() {
             if crossword.letters[x_index][y_index_current] != EMPTY
                 && crossword.letters[x_index][y_index_current] != letter {
                 insertable = false;
@@ -170,13 +168,13 @@ fn insert_word(
 
     if insertable && *direction == Direction::Across {
         let mut x_index_current = x_index - word_and_letter.n_letters_before;
-        for letter in word.chars() {
+        for letter in word_and_letter.word.chars() {
             crossword.letters[x_index_current][y_index] = letter;
             x_index_current += 1;
         }
     } else if insertable && *direction == Direction::Down {
         let mut y_index_current = y_index - word_and_letter.n_letters_before;
-        for letter in word.chars() {
+        for letter in word_and_letter.word.chars() {
             crossword.letters[x_index][y_index_current] = letter;
             y_index_current += 1;
         }
