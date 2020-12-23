@@ -23,8 +23,10 @@ fn main() {
     let mut best_options = vec![];
     compare_options(&words, &letter_map, &mut words_in_crossword, &mut crossword, &mut best_options);
 
-    for crossword in best_options {
+    for crossword in &best_options {
         crossword.print();
+        println!();
     }
+    println!("{} options", best_options.len());
 }
 

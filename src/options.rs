@@ -272,7 +272,7 @@ fn remove_word(
             for x in (crossword.left_edge..=crossword.right_edge).rev() {
                 for y in crossword.upper_edge..=crossword.lower_edge {
                     if crossword.letters[x][y] != EMPTY {
-                        crossword.left_edge = x;
+                        crossword.right_edge = x;
                         found_edge = true;
                         break;
                     }
