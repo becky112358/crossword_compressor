@@ -9,14 +9,9 @@ use crate::options::compare_options;
 fn main() {
     let words = vec![
         "hereby",
-        "presented",
         "exist",
-        "selected",
         "words",
-        "intended",
         "for",
-        "initial",
-        "program",
         "testing",
     ];
 

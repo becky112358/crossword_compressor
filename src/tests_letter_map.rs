@@ -19,15 +19,31 @@ mod tests {
 
         let i_entry = letter_map.get(&'i').unwrap();
         assert_eq!(1, i_entry.len());
-        assert!(i_entry.contains(&1));
+        helper_word_and_letter_vector_contains_word_index(&i_entry, 1);
 
         let z_entry = letter_map.get(&'z');
-        assert_eq!(None, z_entry);
+        match z_entry {
+            Some(_) => assert!(false, "No words contain letter z, but the lettery map contains a z entry"),
+            None => (),
+        }
 
         let e_entry = letter_map.get(&'e').unwrap();
         assert_eq!(2, e_entry.len());
-        assert!(e_entry.contains(&0));
-        assert!(e_entry.contains(&5));
+        helper_word_and_letter_vector_contains_word_index(&e_entry, 0);
+        helper_word_and_letter_vector_contains_word_index(&e_entry, 5);
+    }
+
+    fn helper_word_and_letter_vector_contains_word_index(word_and_letters: &Vec<WordAndLetter>, word_index: usize) {
+        let mut contains = false;
+
+        for word_and_letter in word_and_letters {
+            if word_and_letter.word_index == word_index {
+                contains = true;
+                break;
+            }
+        }
+
+        assert_eq!(true, contains);
     }
 }
 
