@@ -25,8 +25,8 @@ pub fn compare_options(
     crossword: &mut Crossword,
     best_crosswords: &mut Vec<Crossword>) {
 
-    for y_index in crossword.upper_edge..=crossword.lower_edge {
-        for x_index in crossword.left_edge..=crossword.right_edge {
+    for x_index in crossword.left_edge..=crossword.right_edge {
+        for y_index in crossword.upper_edge..=crossword.lower_edge {
             let direction = is_crossable_letter(crossword, x_index, y_index);
             let crossable_words = letter_map.get(&crossword.letters[x_index][y_index]);
             match crossable_words {
