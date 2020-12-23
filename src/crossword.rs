@@ -1,5 +1,5 @@
 
-pub const EMPTY: char = '#';
+pub const EMPTY: char = ' ';
 
 #[derive(Clone)]
 pub struct Crossword {
