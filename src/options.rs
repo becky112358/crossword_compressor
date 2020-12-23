@@ -11,6 +11,14 @@ enum Direction {
     NotCrossable
 }
 
+#[derive(PartialEq)]
+enum Comparison {
+    First,
+    Better,
+    AsGood,
+    Worse,
+}
+
 pub fn compare_options(
     words: &Vec<&str>,
     letter_map: &HashMap<char, Vec<WordAndLetter>>,
@@ -28,10 +36,12 @@ pub fn compare_options(
                         for word_and_letter in crossable_words {
                             let word = words[word_and_letter.word_index];
                             if insert_word(x_index, y_index, &direction, &word_and_letter, &word, &mut words_in_crossword, crossword) {
-                                if words_in_crossword.contains(&false) {
+                                let crossword_status = compare_crosswords(crossword, best_crosswords);
+                                if crossword_status == Comparison::Worse {
+                                } else if words_in_crossword.contains(&false) {
                                     compare_options(words, letter_map, words_in_crossword, crossword, best_crosswords);
                                 } else {
-                                    compare_crosswords(crossword, best_crosswords);
+                                    add_crossword(crossword_status, crossword, best_crosswords);
                                 }
                                 remove_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword);
                             }
@@ -195,24 +205,40 @@ fn insert_word(
     return insertable;
 }
 
-fn compare_crosswords(crossword: &Crossword, best_crosswords: &mut Vec<Crossword>) {
+fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
+    let comparison;
+
     if best_crosswords.len() == 0 {
-        let clone = crossword.clone();
-        best_crosswords.push(clone);
+        comparison = Comparison::First;
     } else {
         let (current_min, current_max) = best_crosswords[0].get_min_max();
         let (new_min, new_max) = crossword.get_min_max();
 
         if (new_max < current_max) || (new_max == current_max && new_min < current_min) {
-            let clone = crossword.clone();
-            while best_crosswords.len() > 0 {       // TODO: What's happenning to memory here?
+            comparison = Comparison::Better;
+        } else if (new_max == current_max) && (new_min == current_min) {
+            comparison = Comparison::AsGood;
+        } else {
+            comparison = Comparison::Worse;
+        }
+    }
+
+    return comparison;
+}
+
+fn add_crossword(comparison: Comparison, crossword: &Crossword, best_crosswords: &mut Vec<Crossword>) {
+    match comparison {
+        Comparison::Better => {
+            while best_crosswords.len() > 0 {
                 best_crosswords.pop();
             }
-            best_crosswords.push(clone);
-        } else if (new_max == current_max) && new_min == current_min {
-            let clone = crossword.clone();
-            best_crosswords.push(clone);
         }
+        _ => (),
+    }
+
+    match comparison {
+        Comparison::First | Comparison::Better | Comparison::AsGood => best_crosswords.push(crossword.clone()),
+        Comparison::Worse => (),
     }
 }
 
