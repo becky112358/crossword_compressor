@@ -1,6 +1,4 @@
 
-mod combinations;
-use crate::combinations::get_combinations;
 mod crossword;
 use crate::crossword::initialise_crossword;
 mod letter_map;
@@ -22,7 +20,6 @@ fn main() {
         "testing",
     ];
 
-    let combinations = get_combinations(5);
     let mut letter_map = get_letter_map(&words);
 
     let mut crossword = initialise_crossword(&words, "beginning");
