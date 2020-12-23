@@ -6,7 +6,7 @@ pub fn get_letter_map(words: &Vec<&str>) -> HashMap<char, Vec<usize>> {
 
     for i in 0..words.len() {
         for letter in words[i].to_lowercase().chars() {
-            let mut words_with_letter = letter_map.entry(letter).or_insert(vec![i]);
+            let words_with_letter = letter_map.entry(letter).or_insert(vec![i]);
             if !words_with_letter.contains(&i) {
                 words_with_letter.push(i);
             }

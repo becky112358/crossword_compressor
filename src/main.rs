@@ -20,7 +20,7 @@ fn main() {
         "testing",
     ];
 
-    let mut letter_map = get_letter_map(&words);
+    let letter_map = get_letter_map(&words);
 
     let mut crossword = initialise_crossword(&words, "beginning");
 
