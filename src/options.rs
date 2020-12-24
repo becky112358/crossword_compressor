@@ -95,9 +95,6 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut c
 
     if insertable {
         write_word(cross_data, &mut crossword);
-    }
-
-    if insertable {
         words_in_crossword[cross_data.word_and_letter.word_index] = true;
         update_edges_for_insert(cross_data, &mut crossword);
     }
