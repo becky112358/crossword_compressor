@@ -88,23 +88,7 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut c
 
     insertable = insertable && can_fit_word_in_crossword(cross_data, crossword);
 
-    if insertable && *cross_data.direction == Direction::Across {
-        if cross_data.x_index > cross_data.word_and_letter.n_letters_before
-                && crossword.letters[cross_data.x_index - cross_data.word_and_letter.n_letters_before - 1][cross_data.y_index] != EMPTY {
-            insertable = false;
-        } else if cross_data.x_index + cross_data.word_and_letter.n_letters_after < crossword.letters.len() - 1
-                && crossword.letters[cross_data.x_index + cross_data.word_and_letter.n_letters_after + 1][cross_data.y_index] != EMPTY {
-            insertable = false;
-        }
-    } else if insertable && *cross_data.direction == Direction::Down {
-        if cross_data.y_index > cross_data.word_and_letter.n_letters_before
-            && crossword.letters[cross_data.x_index][cross_data.y_index - cross_data.word_and_letter.n_letters_before - 1] != EMPTY {
-            insertable = false;
-        } else if cross_data.y_index + cross_data.word_and_letter.n_letters_after < crossword.letters[0].len() - 1
-                && crossword.letters[cross_data.x_index][cross_data.y_index + cross_data.word_and_letter.n_letters_after + 1] != EMPTY {
-            insertable = false;
-        }
-    }
+    insertable = insertable && are_endpoints_clear(cross_data, crossword);
 
     if insertable && *cross_data.direction == Direction::Across {
         for x in cross_data.x_index - cross_data.word_and_letter.n_letters_before..=cross_data.x_index + cross_data.word_and_letter.n_letters_after {
@@ -186,6 +170,33 @@ fn can_fit_word_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> b
     }
 
     return can_fit;
+}
+
+fn are_endpoints_clear(cross_data: &CrossData, crossword: &Crossword) -> bool {
+    let mut clear = true;
+
+    let endpoint_before = cross_data.word_and_letter.n_letters_before + 1;
+    let endpoint_after = cross_data.word_and_letter.n_letters_after + 1;
+
+    if *cross_data.direction == Direction::Across {
+        if cross_data.x_index > cross_data.word_and_letter.n_letters_before
+        && crossword.letters[cross_data.x_index - endpoint_before][cross_data.y_index] != EMPTY {
+            clear = false;
+        } else if cross_data.x_index + cross_data.word_and_letter.n_letters_after < crossword.letters.len() - 1
+               && crossword.letters[cross_data.x_index + endpoint_after][cross_data.y_index] != EMPTY {
+            clear = false;
+        }
+    } else if *cross_data.direction == Direction::Down {
+        if cross_data.y_index > cross_data.word_and_letter.n_letters_before
+        && crossword.letters[cross_data.x_index][cross_data.y_index - endpoint_before] != EMPTY {
+            clear = false;
+        } else if cross_data.y_index + cross_data.word_and_letter.n_letters_after < crossword.letters[0].len() - 1
+               && crossword.letters[cross_data.x_index][cross_data.y_index + endpoint_after] != EMPTY {
+            clear = false;
+        }
+    }
+
+    return clear;
 }
 
 fn all_letters_in_path_match(cross_data: &CrossData, crossword: &Crossword) -> bool {
