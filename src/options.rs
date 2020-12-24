@@ -80,9 +80,9 @@ fn insert_word(
     let mut insertable = !words_in_crossword[word_and_letter.word_index];
 
     if insertable && *direction == Direction::Across {
-        if x_index - word_and_letter.n_letters_before < 0 {
+        if x_index < word_and_letter.n_letters_before {
             insertable = false;
-        } else if x_index - word_and_letter.n_letters_before > 0
+        } else if x_index > word_and_letter.n_letters_before
                 && crossword.letters[x_index - word_and_letter.n_letters_before - 1][y_index] != EMPTY {
             insertable = false;
         } else if x_index + word_and_letter.n_letters_after > crossword.letters.len() - 1 {
@@ -92,9 +92,9 @@ fn insert_word(
             insertable = false;
         }
     } else if insertable && *direction == Direction::Down {
-        if y_index - word_and_letter.n_letters_before < 0 {
+        if y_index < word_and_letter.n_letters_before {
             insertable = false;
-        } else if y_index - word_and_letter.n_letters_before > 0
+        } else if y_index > word_and_letter.n_letters_before
             && crossword.letters[x_index][y_index - word_and_letter.n_letters_before - 1] != EMPTY {
             insertable = false;
         } else if y_index + word_and_letter.n_letters_after > crossword.letters[0].len() - 1 {
