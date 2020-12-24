@@ -85,13 +85,13 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut c
 
     let mut insertable = !words_in_crossword[cross_data.word_and_letter.word_index];
 
-    insertable = insertable && can_fit_word_in_crossword(cross_data, crossword);
+    insertable = insertable && check_word_fits_in_crossword(cross_data, crossword);
 
-    insertable = insertable && are_endpoints_clear(cross_data, crossword);
+    insertable = insertable && check_endpoints(cross_data, crossword);
 
-    insertable = insertable && are_sides_clear_except_at_crosspoints(cross_data, crossword);
+    insertable = insertable && check_sides_clear_except_at_crosspoints(cross_data, crossword);
 
-    insertable = insertable && all_letters_in_path_match(cross_data, crossword);
+    insertable = insertable && check_all_letters_in_path_match(cross_data, crossword);
 
     if insertable {
         write_word(cross_data, &mut crossword);
@@ -102,7 +102,7 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut c
     return insertable;
 }
 
-fn can_fit_word_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> bool {
+fn check_word_fits_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> bool {
     let can_fit;
     let index = if *cross_data.direction == Direction::Across { cross_data.x_index } else { cross_data.y_index };
     let crossword_width = if *cross_data.direction == Direction::Across { crossword.letters.len() } 
@@ -119,7 +119,7 @@ fn can_fit_word_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> b
     return can_fit;
 }
 
-fn are_endpoints_clear(cross_data: &CrossData, crossword: &Crossword) -> bool {
+fn check_endpoints(cross_data: &CrossData, crossword: &Crossword) -> bool {
     let mut clear = true;
 
     let endpoint_before = cross_data.word_and_letter.n_letters_before + 1;
@@ -146,7 +146,7 @@ fn are_endpoints_clear(cross_data: &CrossData, crossword: &Crossword) -> bool {
     return clear;
 }
 
-fn are_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &Crossword) -> bool {
+fn check_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &Crossword) -> bool {
     let mut clear = true;
 
     if *cross_data.direction == Direction::Across {
@@ -194,7 +194,7 @@ fn are_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &Cro
     return clear;
 }
 
-fn all_letters_in_path_match(cross_data: &CrossData, crossword: &Crossword) -> bool {
+fn check_all_letters_in_path_match(cross_data: &CrossData, crossword: &Crossword) -> bool {
     let mut all_letters_match = true;
 
     let (mut x, mut y) = get_x_y_start(cross_data);
