@@ -8,7 +8,6 @@ use crate::letter_map::WordAndLetter;
 enum Direction {
     Across,
     Down,
-    NotCrossable
 }
 
 #[derive(PartialEq)]
@@ -35,9 +34,8 @@ pub fn compare_options(
     // todo write an iterator on crossword that returns (x_index, y_index, direction)
     for x_index in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
         for y_index in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
-            let direction = is_crossable_letter(crossword, x_index, y_index);
-            if let Some(crossable_words) = letter_map.get(&crossword.letters[x_index][y_index]) {
-                if direction != Direction::NotCrossable {
+            if let Some(direction) = is_crossable_letter(crossword, x_index, y_index) {
+                if let Some(crossable_words) = letter_map.get(&crossword.letters[x_index][y_index]) {
                     for word_and_letter in crossable_words {
 
                         let cross_data = CrossData {
@@ -63,19 +61,19 @@ pub fn compare_options(
     }
 }
 
-fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) -> Direction {
+fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) -> Option<Direction> {
     let direction;
 
     if crossword.letters[x_index][y_index] == EMPTY {
-        direction = Direction::NotCrossable;
+        direction = None;
     } else if (x_index == 0 || crossword.letters[x_index-1][y_index] == EMPTY)
             && (x_index == crossword.letters.len() - 1 || crossword.letters[x_index+1][y_index] == EMPTY) {
-        direction = Direction::Across;
+        direction = Some(Direction::Across);
     } else if (y_index == 0 || crossword.letters[x_index][y_index-1] == EMPTY)
             && (y_index == crossword.letters[0].len() - 1 || crossword.letters[x_index][y_index+1] == EMPTY) {
-        direction = Direction::Down;
+        direction = Some(Direction::Down);
     } else {
-        direction = Direction::NotCrossable;
+        direction = None;
     }
 
     return direction;
@@ -226,7 +224,6 @@ fn get_x_y_start(cross_data: &CrossData) -> (usize, usize) {
     match *cross_data.direction {
         Direction::Across => x -= cross_data.word_and_letter.n_letters_before,
         Direction::Down => y -= cross_data.word_and_letter.n_letters_before,
-        _ => (),
     }
 
     return (x, y);
@@ -236,7 +233,6 @@ fn get_x_y_next(cross_data: &CrossData, x: &mut usize, y: &mut usize) {
     match *cross_data.direction {
         Direction::Across => *x += 1,
         Direction::Down => *y += 1,
-        _ => (),
     }
 }
 
