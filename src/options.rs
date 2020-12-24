@@ -90,41 +90,7 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut c
 
     insertable = insertable && are_endpoints_clear(cross_data, crossword);
 
-    if insertable && *cross_data.direction == Direction::Across {
-        for x in cross_data.x_index - cross_data.word_and_letter.n_letters_before..=cross_data.x_index + cross_data.word_and_letter.n_letters_after {
-            if x == cross_data.x_index {
-                continue;
-            }
-
-            if crossword.letters[x][cross_data.y_index] == EMPTY {
-                if cross_data.y_index > 0 && crossword.letters[x][cross_data.y_index-1] != EMPTY {
-                    insertable = false;
-                    break;
-                } else if cross_data.y_index < crossword.letters[0].len() - 1 && crossword.letters[x][cross_data.y_index+1] != EMPTY {
-                    insertable = false;
-                    break;
-                }
-            }
-            
-        }
-    } else if insertable && *cross_data.direction == Direction::Down {
-        for y in cross_data.y_index - cross_data.word_and_letter.n_letters_before..=cross_data.y_index + cross_data.word_and_letter.n_letters_after {
-            if y == cross_data.y_index {
-                continue;
-            }
-
-            if crossword.letters[cross_data.x_index][y] == EMPTY {
-                if cross_data.x_index > 0 && crossword.letters[cross_data.x_index-1][y] != EMPTY {
-                    insertable = false;
-                    break;
-                } else if cross_data.x_index < crossword.letters.len() - 1 && crossword.letters[cross_data.x_index+1][y] != EMPTY {
-                    insertable = false;
-                    break;
-                }
-            }
-            
-        }
-    }
+    insertable = insertable && are_sides_clear_except_at_crosspoints(cross_data, crossword);
 
     insertable = insertable && all_letters_in_path_match(cross_data, crossword);
 
@@ -193,6 +159,54 @@ fn are_endpoints_clear(cross_data: &CrossData, crossword: &Crossword) -> bool {
         } else if cross_data.y_index + cross_data.word_and_letter.n_letters_after < crossword.letters[0].len() - 1
                && crossword.letters[cross_data.x_index][cross_data.y_index + endpoint_after] != EMPTY {
             clear = false;
+        }
+    }
+
+    return clear;
+}
+
+fn are_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &Crossword) -> bool {
+    let mut clear = true;
+
+    if *cross_data.direction == Direction::Across {
+        let x_min = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
+        let x_max = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
+        for x in x_min..=x_max {
+            if x == cross_data.x_index {
+                continue;
+            }
+
+            if crossword.letters[x][cross_data.y_index] == EMPTY {
+                if cross_data.y_index > 0 && crossword.letters[x][cross_data.y_index-1] != EMPTY {
+                    clear = false;
+                    break;
+                } else if cross_data.y_index < crossword.letters[0].len() - 1
+                       && crossword.letters[x][cross_data.y_index+1] != EMPTY {
+                    clear = false;
+                    break;
+                }
+            }
+            
+        }
+    } else if *cross_data.direction == Direction::Down {
+        let y_min = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
+        let y_max = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
+        for y in y_min..=y_max {
+            if y == cross_data.y_index {
+                continue;
+            }
+
+            if crossword.letters[cross_data.x_index][y] == EMPTY {
+                if cross_data.x_index > 0 && crossword.letters[cross_data.x_index-1][y] != EMPTY {
+                    clear = false;
+                    break;
+                } else if cross_data.x_index < crossword.letters.len() - 1
+                       && crossword.letters[cross_data.x_index+1][y] != EMPTY {
+                    clear = false;
+                    break;
+                }
+            }
+            
         }
     }
 
