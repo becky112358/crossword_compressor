@@ -79,25 +79,23 @@ fn insert_word(
     // TODO FULL of duplication!!
     let mut insertable = !words_in_crossword[word_and_letter.word_index];
 
+    if *direction == Direction::Across {
+        insertable = insertable && can_fit_word_in_crossword(x_index, word_and_letter, crossword.letters.len());
+    } else if *direction == Direction::Down {
+        insertable = insertable && can_fit_word_in_crossword(y_index, word_and_letter, crossword.letters[0].len());
+    }
+
     if insertable && *direction == Direction::Across {
-        if x_index < word_and_letter.n_letters_before {
-            insertable = false;
-        } else if x_index > word_and_letter.n_letters_before
+        if x_index > word_and_letter.n_letters_before
                 && crossword.letters[x_index - word_and_letter.n_letters_before - 1][y_index] != EMPTY {
-            insertable = false;
-        } else if x_index + word_and_letter.n_letters_after > crossword.letters.len() - 1 {
             insertable = false;
         } else if x_index + word_and_letter.n_letters_after < crossword.letters.len() - 1
                 && crossword.letters[x_index + word_and_letter.n_letters_after + 1][y_index] != EMPTY {
             insertable = false;
         }
     } else if insertable && *direction == Direction::Down {
-        if y_index < word_and_letter.n_letters_before {
-            insertable = false;
-        } else if y_index > word_and_letter.n_letters_before
+        if y_index > word_and_letter.n_letters_before
             && crossword.letters[x_index][y_index - word_and_letter.n_letters_before - 1] != EMPTY {
-            insertable = false;
-        } else if y_index + word_and_letter.n_letters_after > crossword.letters[0].len() - 1 {
             insertable = false;
         } else if y_index + word_and_letter.n_letters_after < crossword.letters[0].len() - 1
                 && crossword.letters[x_index][y_index + word_and_letter.n_letters_after + 1] != EMPTY {
@@ -198,6 +196,18 @@ fn insert_word(
     }
 
     return insertable;
+}
+
+fn can_fit_word_in_crossword(index: usize, word_and_letter: &WordAndLetter, crossword_width: usize) -> bool {
+    let can_fit;
+    if word_and_letter.n_letters_before > index {
+        can_fit = false;
+    } else if index + word_and_letter.n_letters_after > crossword_width - 1 {
+        can_fit = false;
+    } else {
+        can_fit = true;
+    }
+    return can_fit;
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
