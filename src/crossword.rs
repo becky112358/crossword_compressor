@@ -1,19 +1,21 @@
 
 pub const EMPTY: char = ' ';
 
+pub const X: usize = 0;
+pub const Y: usize = 1;
+pub const MIN: usize = 0;
+pub const MAX: usize = 1;
+
 #[derive(Clone)]
 pub struct Crossword {
-    pub right_edge: usize,
-    pub upper_edge: usize,
-    pub left_edge: usize,
-    pub lower_edge: usize,
+    pub edges: [[usize; 2]; 2],
     pub letters: Vec<Vec<char>>,
 }
 
 impl Crossword {
     pub fn get_min_max(&self) -> (usize, usize) {
-        let x_len = self.right_edge - self.left_edge + 1;
-        let y_len = self.lower_edge - self.upper_edge + 1;
+        let x_len = self.edges[X][MAX] - self.edges[X][MIN] + 1;
+        let y_len = self.edges[Y][MAX] - self.edges[Y][MIN] + 1;
 
         let min;
         let max;
@@ -30,20 +32,17 @@ impl Crossword {
     }
 
     pub fn clone_shrink(&self) -> Crossword {
-        let x_size = self.right_edge - self.left_edge + 1;
-        let y_size = self.lower_edge - self.upper_edge + 1;
+        let x_size = self.edges[X][MAX] - self.edges[X][MIN] + 1;
+        let y_size = self.edges[Y][MAX] - self.edges[Y][MIN] + 1;
 
         let mut other = Crossword {
-            right_edge: x_size - 1,
-            upper_edge: 0,
-            left_edge: 0,
-            lower_edge: y_size - 1,
+            edges: [[0,x_size-1], [0,y_size-1]],
             letters: vec![vec![EMPTY; y_size]; x_size],
         };
 
-        for x_index in self.left_edge..=self.right_edge {
-            for y_index in self.upper_edge..=self.lower_edge {
-                other.letters[x_index-self.left_edge][y_index-self.upper_edge] = self.letters[x_index][y_index];
+        for x_index in self.edges[X][MIN]..=self.edges[X][MAX] {
+            for y_index in self.edges[Y][MIN]..=self.edges[Y][MAX] {
+                other.letters[x_index-self.edges[X][MIN]][y_index-self.edges[Y][MIN]] = self.letters[x_index][y_index];
             }
         }
 
@@ -51,8 +50,8 @@ impl Crossword {
     }
 
     pub fn print(&self) {
-        for y in self.upper_edge..=self.lower_edge {
-            for x in self.left_edge..=self.right_edge {
+        for y in self.edges[Y][MIN]..=self.edges[Y][MAX] {
+            for x in self.edges[X][MIN]..=self.edges[X][MAX] {
                 print!("{}", self.letters[x][y]);
             }
             println!();
@@ -65,10 +64,8 @@ pub fn initialise_crossword(words: &Vec<&str>, start_word: &str) -> Crossword {
     let square_size = sum_of_longest_words * 2 + start_word.len();
 
     let mut crossword = Crossword {
-        left_edge: sum_of_longest_words,
-        upper_edge: sum_of_longest_words,
-        right_edge: sum_of_longest_words + start_word.len() - 1,
-        lower_edge: sum_of_longest_words,
+        edges: [[sum_of_longest_words, sum_of_longest_words + start_word.len() - 1],
+                [sum_of_longest_words, sum_of_longest_words]],
         letters: vec![vec![EMPTY; square_size]; square_size],
     };
 
