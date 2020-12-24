@@ -81,7 +81,7 @@ fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) ->
     return direction;
 }
 
-fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, crossword: &mut Crossword) -> bool {
+fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut crossword: &mut Crossword) -> bool {
 
     // TODO FULL of duplication!!
     let mut insertable = !words_in_crossword[cross_data.word_and_letter.word_index];
@@ -144,18 +144,8 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
 
     insertable = insertable && all_letters_in_path_match(cross_data, crossword);
 
-    if insertable && *cross_data.direction == Direction::Across {
-        let mut x_index_current = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
-        for letter in cross_data.word_and_letter.word.chars() {
-            crossword.letters[x_index_current][cross_data.y_index] = letter;
-            x_index_current += 1;
-        }
-    } else if insertable && *cross_data.direction == Direction::Down {
-        let mut y_index_current = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
-        for letter in cross_data.word_and_letter.word.chars() {
-            crossword.letters[cross_data.x_index][y_index_current] = letter;
-            y_index_current += 1;
-        }
+    if insertable {
+        write_word(cross_data, &mut crossword);
     }
 
     if insertable {
@@ -199,31 +189,49 @@ fn can_fit_word_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> b
 }
 
 fn all_letters_in_path_match(cross_data: &CrossData, crossword: &Crossword) -> bool {
-
     let mut all_letters_match = true;
 
-    let mut x = cross_data.x_index;
-    let mut y = cross_data.y_index;
-
-    match *cross_data.direction {
-        Direction::Across => x -= cross_data.word_and_letter.n_letters_before,
-        Direction::Down => y -= cross_data.word_and_letter.n_letters_before,
-        _ => all_letters_match = false,
-    }
+    let (mut x, mut y) = get_x_y_start(cross_data);
 
     for letter in cross_data.word_and_letter.word.chars() {
         if crossword.letters[x][y] != EMPTY && crossword.letters[x][y] != letter {
             all_letters_match = false;
             break;
         }
-        match *cross_data.direction {
-            Direction::Across => x += 1,
-            Direction::Down => y += 1,
-            _ => all_letters_match = false,
-        }
+        get_x_y_next(cross_data, &mut x, &mut y);
     }
 
     return all_letters_match;
+}
+
+fn write_word(cross_data: &CrossData, crossword: &mut Crossword) {
+    let (mut x, mut y) = get_x_y_start(cross_data);
+
+    for letter in cross_data.word_and_letter.word.chars() {
+        crossword.letters[x][y] = letter;
+        get_x_y_next(cross_data, &mut x, &mut y);
+    }
+}
+
+fn get_x_y_start(cross_data: &CrossData) -> (usize, usize) {
+    let mut x = cross_data.x_index;
+    let mut y = cross_data.y_index;
+
+    match *cross_data.direction {
+        Direction::Across => x -= cross_data.word_and_letter.n_letters_before,
+        Direction::Down => y -= cross_data.word_and_letter.n_letters_before,
+        _ => (),
+    }
+
+    return (x, y);
+}
+
+fn get_x_y_next(cross_data: &CrossData, x: &mut usize, y: &mut usize) {
+    match *cross_data.direction {
+        Direction::Across => *x += 1,
+        Direction::Down => *y += 1,
+        _ => (),
+    }
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
