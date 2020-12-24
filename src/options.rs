@@ -148,19 +148,18 @@ fn check_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &C
     let mut clear = true;
 
     if *cross_data.direction == Direction::Across {
-        let x_min = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
-        let x_max = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
-        for x in x_min..=x_max {
+        let (x_lower, x_upper) = get_x_lower_upper(cross_data);
+        let y = cross_data.y_index;
+        for x in x_lower..=x_upper {
             if x == cross_data.x_index {
                 continue;
             }
 
-            if crossword.letters[x][cross_data.y_index] == EMPTY {
-                if cross_data.y_index > 0 && crossword.letters[x][cross_data.y_index-1] != EMPTY {
+            if crossword.letters[x][y] == EMPTY {
+                if y > 0 && crossword.letters[x][y-1] != EMPTY {
                     clear = false;
                     break;
-                } else if cross_data.y_index < crossword.letters[0].len() - 1
-                       && crossword.letters[x][cross_data.y_index+1] != EMPTY {
+                } else if y < crossword.letters[0].len() - 1 && crossword.letters[x][y+1] != EMPTY {
                     clear = false;
                     break;
                 }
@@ -168,19 +167,18 @@ fn check_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &C
             
         }
     } else if *cross_data.direction == Direction::Down {
-        let y_min = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
-        let y_max = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
-        for y in y_min..=y_max {
+        let x = cross_data.x_index;
+        let (y_lower, y_upper) = get_y_lower_upper(cross_data);
+        for y in y_lower..=y_upper {
             if y == cross_data.y_index {
                 continue;
             }
 
-            if crossword.letters[cross_data.x_index][y] == EMPTY {
-                if cross_data.x_index > 0 && crossword.letters[cross_data.x_index-1][y] != EMPTY {
+            if crossword.letters[x][y] == EMPTY {
+                if x > 0 && crossword.letters[x-1][y] != EMPTY {
                     clear = false;
                     break;
-                } else if cross_data.x_index < crossword.letters.len() - 1
-                       && crossword.letters[cross_data.x_index+1][y] != EMPTY {
+                } else if x < crossword.letters.len() - 1 && crossword.letters[x+1][y] != EMPTY {
                     clear = false;
                     break;
                 }
@@ -288,29 +286,29 @@ fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
     // TODO FULL of duplication!!
 
     if *cross_data.direction == Direction::Across {
-        for x in cross_data.x_index-cross_data.word_and_letter.n_letters_before
-                 ..=cross_data.x_index+cross_data.word_and_letter.n_letters_after {
+        let (x_lower, x_upper) = get_x_lower_upper(cross_data);
+        let y = cross_data.y_index;
+        for x in x_lower..=x_upper {
             if x == cross_data.x_index {
                 continue;
-            } else if (cross_data.y_index > 0 && crossword.letters[x][cross_data.y_index-1] != EMPTY)
-                || (cross_data.y_index < crossword.letters[0].len() - 1
-                && crossword.letters[x][cross_data.y_index+1] != EMPTY) {
+            } else if (y > 0 && crossword.letters[x][y-1] != EMPTY)
+                   || (y < crossword.letters[0].len() - 1 && crossword.letters[x][y+1] != EMPTY) {
                 continue;
             } else {
-                crossword.letters[x][cross_data.y_index] = EMPTY;
+                crossword.letters[x][y] = EMPTY;
             }
         }
     } else if *cross_data.direction == Direction::Down {
-        for y in cross_data.y_index-cross_data.word_and_letter.n_letters_before
-                 ..=cross_data.y_index+cross_data.word_and_letter.n_letters_after {
+        let x = cross_data.x_index;
+        let (y_lower, y_upper) = get_y_lower_upper(cross_data);
+        for y in y_lower..=y_upper {
             if y == cross_data.y_index {
                 continue;
-            } else if (cross_data.x_index > 0 && crossword.letters[cross_data.x_index-1][y] != EMPTY)
-                || (cross_data.x_index < crossword.letters.len() - 1
-                && crossword.letters[cross_data.x_index+1][y] != EMPTY) {
+            } else if (x > 0 && crossword.letters[x-1][y] != EMPTY)
+                   || (x < crossword.letters.len() - 1 && crossword.letters[x+1][y] != EMPTY) {
                 continue;
             } else {
-                crossword.letters[cross_data.x_index][y] = EMPTY;
+                crossword.letters[x][y] = EMPTY;
             }
         }
     }
@@ -383,4 +381,17 @@ fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
 
     words_in_crossword[cross_data.word_and_letter.word_index] = false;
 }
+
+fn get_x_lower_upper(cross_data: &CrossData) -> (usize, usize) {
+    let x_lower = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
+    let x_upper = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
+    return (x_lower, x_upper);
+}
+
+fn get_y_lower_upper(cross_data: &CrossData) -> (usize, usize) {
+    let y_lower = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
+    let y_upper = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
+    return (y_lower, y_upper);
+}
+
 
