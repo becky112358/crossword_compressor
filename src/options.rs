@@ -36,9 +36,8 @@ pub fn compare_options(
     for x_index in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
         for y_index in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
             let direction = is_crossable_letter(crossword, x_index, y_index);
-            let crossable_words = letter_map.get(&crossword.letters[x_index][y_index]);
-            match crossable_words {
-                Some(crossable_words) => if direction != Direction::NotCrossable {
+            if let Some(crossable_words) = letter_map.get(&crossword.letters[x_index][y_index]) {
+                if direction != Direction::NotCrossable {
                     for word_and_letter in crossable_words {
 
                         let cross_data = CrossData {
@@ -58,8 +57,7 @@ pub fn compare_options(
                             remove_word(&cross_data, &mut words_in_crossword, crossword);
                         }
                     }
-                },
-                None => (),
+                }
             }
         }
     }
