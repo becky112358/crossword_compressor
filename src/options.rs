@@ -19,6 +19,13 @@ enum Comparison {
     Worse,
 }
 
+struct CrossData<'a> {
+    x_index: usize,
+    y_index: usize,
+    direction: &'a Direction,
+    word_and_letter: &'a WordAndLetter<'a>,
+}
+
 pub fn compare_options(
     letter_map: &HashMap<char, Vec<WordAndLetter>>,
     mut words_in_crossword: &mut Vec<bool>,
@@ -32,7 +39,13 @@ pub fn compare_options(
             match crossable_words {
                 Some(crossable_words) => if direction != Direction::NotCrossable {
                     for word_and_letter in crossable_words {
-                        if insert_word(x_index, y_index, &direction, &word_and_letter, &mut words_in_crossword, crossword) {
+                        let cross_data = CrossData {
+                            x_index,
+                            y_index,
+                            direction: &direction,
+                            word_and_letter: &word_and_letter };
+
+                        if insert_word(&cross_data, &mut words_in_crossword, crossword) {
                             let crossword_status = compare_crosswords(crossword, best_crosswords);
                             if crossword_status == Comparison::Worse {
                             } else if words_in_crossword.contains(&false) {
@@ -68,69 +81,59 @@ fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) ->
     return direction;
 }
 
-fn insert_word(
-    x_index: usize,
-    y_index: usize,
-    direction: &Direction,
-    word_and_letter: &WordAndLetter,
-    words_in_crossword: &mut Vec<bool>,
-    crossword: &mut Crossword) -> bool {
+fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, crossword: &mut Crossword) -> bool {
 
     // TODO FULL of duplication!!
-    let mut insertable = !words_in_crossword[word_and_letter.word_index];
+    let mut insertable = !words_in_crossword[cross_data.word_and_letter.word_index];
 
-    if *direction == Direction::Across {
-        insertable = insertable && can_fit_word_in_crossword(x_index, word_and_letter, crossword.letters.len());
-    } else if *direction == Direction::Down {
-        insertable = insertable && can_fit_word_in_crossword(y_index, word_and_letter, crossword.letters[0].len());
-    }
+    insertable = insertable && can_fit_word_in_crossword(cross_data, crossword);
 
-    if insertable && *direction == Direction::Across {
-        if x_index > word_and_letter.n_letters_before
-                && crossword.letters[x_index - word_and_letter.n_letters_before - 1][y_index] != EMPTY {
+    if insertable && *cross_data.direction == Direction::Across {
+        if cross_data.x_index > cross_data.word_and_letter.n_letters_before
+                && crossword.letters[cross_data.x_index - cross_data.word_and_letter.n_letters_before - 1][cross_data.y_index] != EMPTY {
             insertable = false;
-        } else if x_index + word_and_letter.n_letters_after < crossword.letters.len() - 1
-                && crossword.letters[x_index + word_and_letter.n_letters_after + 1][y_index] != EMPTY {
+        } else if cross_data.x_index + cross_data.word_and_letter.n_letters_after < crossword.letters.len() - 1
+                && crossword.letters[cross_data.x_index + cross_data.word_and_letter.n_letters_after + 1][cross_data.y_index] != EMPTY {
             insertable = false;
         }
-    } else if insertable && *direction == Direction::Down {
-        if y_index > word_and_letter.n_letters_before
-            && crossword.letters[x_index][y_index - word_and_letter.n_letters_before - 1] != EMPTY {
+    } else if insertable && *cross_data.direction == Direction::Down {
+        if cross_data.y_index > cross_data.word_and_letter.n_letters_before
+            && crossword.letters[cross_data.x_index][cross_data.y_index - cross_data.word_and_letter.n_letters_before - 1] != EMPTY {
             insertable = false;
-        } else if y_index + word_and_letter.n_letters_after < crossword.letters[0].len() - 1
-                && crossword.letters[x_index][y_index + word_and_letter.n_letters_after + 1] != EMPTY {
+        } else if cross_data.y_index + cross_data.word_and_letter.n_letters_after < crossword.letters[0].len() - 1
+                && crossword.letters[cross_data.x_index][cross_data.y_index + cross_data.word_and_letter.n_letters_after + 1] != EMPTY {
             insertable = false;
         }
     }
 
-    if insertable && *direction == Direction::Across {
-        for x in x_index - word_and_letter.n_letters_before..=x_index + word_and_letter.n_letters_after {
-            if x == x_index {
+    if insertable && *cross_data.direction == Direction::Across {
+        for x in cross_data.x_index - cross_data.word_and_letter.n_letters_before..=cross_data.x_index + cross_data.word_and_letter.n_letters_after {
+            if x == cross_data.x_index {
                 continue;
             }
 
-            if crossword.letters[x][y_index] == EMPTY {
-                if y_index > 0 && crossword.letters[x][y_index-1] != EMPTY {
+            if crossword.letters[x][cross_data.y_index] == EMPTY {
+                if cross_data.y_index > 0 && crossword.letters[x][cross_data.y_index-1] != EMPTY {
                     insertable = false;
                     break;
-                } else if y_index < crossword.letters[0].len() - 1 && crossword.letters[x][y_index+1] != EMPTY {
+                } else if cross_data.y_index < crossword.letters[0].len() - 1 && crossword.letters[x][cross_data.y_index+1] != EMPTY {
                     insertable = false;
                     break;
                 }
             }
             
         }
-    } else if insertable && *direction == Direction::Down {
-        for y in y_index - word_and_letter.n_letters_before..=y_index + word_and_letter.n_letters_after {
-            if y == y_index {
+    } else if insertable && *cross_data.direction == Direction::Down {
+        for y in cross_data.y_index - cross_data.word_and_letter.n_letters_before..=cross_data.y_index + cross_data.word_and_letter.n_letters_after {
+            if y == cross_data.y_index {
                 continue;
             }
 
-            if crossword.letters[x_index][y] == EMPTY {
-                if x_index > 0 && crossword.letters[x_index-1][y] != EMPTY {
+            if crossword.letters[cross_data.x_index][y] == EMPTY {
+                if cross_data.x_index > 0 && crossword.letters[cross_data.x_index-1][y] != EMPTY {
                     insertable = false;
                     break;
-                } else if x_index < crossword.letters.len() - 1 && crossword.letters[x_index+1][y] != EMPTY {
+                } else if cross_data.x_index < crossword.letters.len() - 1 && crossword.letters[cross_data.x_index+1][y] != EMPTY {
                     insertable = false;
                     break;
                 }
@@ -139,21 +142,21 @@ fn insert_word(
         }
     }
 
-    if insertable && *direction == Direction::Across {
-        let mut x_index_current = x_index - word_and_letter.n_letters_before;
-        for letter in word_and_letter.word.chars() {
-            if crossword.letters[x_index_current][y_index] != EMPTY
-                && crossword.letters[x_index_current][y_index] != letter {
+    if insertable && *cross_data.direction == Direction::Across {
+        let mut x_index_current = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
+        for letter in cross_data.word_and_letter.word.chars() {
+            if crossword.letters[x_index_current][cross_data.y_index] != EMPTY
+                && crossword.letters[x_index_current][cross_data.y_index] != letter {
                 insertable = false;
                 break;
             }
             x_index_current += 1;
         }
-    } else if insertable && *direction == Direction::Down {
-        let mut y_index_current = y_index - word_and_letter.n_letters_before;
-        for letter in word_and_letter.word.chars() {
-            if crossword.letters[x_index][y_index_current] != EMPTY
-                && crossword.letters[x_index][y_index_current] != letter {
+    } else if insertable && *cross_data.direction == Direction::Down {
+        let mut y_index_current = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
+        for letter in cross_data.word_and_letter.word.chars() {
+            if crossword.letters[cross_data.x_index][y_index_current] != EMPTY
+                && crossword.letters[cross_data.x_index][y_index_current] != letter {
                 insertable = false;
                 break;
             }
@@ -161,36 +164,36 @@ fn insert_word(
         }
     }
 
-    if insertable && *direction == Direction::Across {
-        let mut x_index_current = x_index - word_and_letter.n_letters_before;
-        for letter in word_and_letter.word.chars() {
-            crossword.letters[x_index_current][y_index] = letter;
+    if insertable && *cross_data.direction == Direction::Across {
+        let mut x_index_current = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
+        for letter in cross_data.word_and_letter.word.chars() {
+            crossword.letters[x_index_current][cross_data.y_index] = letter;
             x_index_current += 1;
         }
-    } else if insertable && *direction == Direction::Down {
-        let mut y_index_current = y_index - word_and_letter.n_letters_before;
-        for letter in word_and_letter.word.chars() {
-            crossword.letters[x_index][y_index_current] = letter;
+    } else if insertable && *cross_data.direction == Direction::Down {
+        let mut y_index_current = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
+        for letter in cross_data.word_and_letter.word.chars() {
+            crossword.letters[cross_data.x_index][y_index_current] = letter;
             y_index_current += 1;
         }
     }
 
     if insertable {
-        words_in_crossword[word_and_letter.word_index] = true;
+        words_in_crossword[cross_data.word_and_letter.word_index] = true;
 
-        if *direction == Direction::Across {
-            if x_index - word_and_letter.n_letters_before < crossword.edges[X][MIN] {
-                crossword.edges[X][MIN] = x_index - word_and_letter.n_letters_before;
+        if *cross_data.direction == Direction::Across {
+            if cross_data.x_index - cross_data.word_and_letter.n_letters_before < crossword.edges[X][MIN] {
+                crossword.edges[X][MIN] = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
             }
-            if x_index + word_and_letter.n_letters_after > crossword.edges[X][MAX] {
-                crossword.edges[X][MAX] = x_index + word_and_letter.n_letters_after;
+            if cross_data.x_index + cross_data.word_and_letter.n_letters_after > crossword.edges[X][MAX] {
+                crossword.edges[X][MAX] = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
             }
-        } else if *direction == Direction::Down {
-            if y_index - word_and_letter.n_letters_before < crossword.edges[Y][MIN] {
-                crossword.edges[Y][MIN] = y_index - word_and_letter.n_letters_before;
+        } else if *cross_data.direction == Direction::Down {
+            if cross_data.y_index - cross_data.word_and_letter.n_letters_before < crossword.edges[Y][MIN] {
+                crossword.edges[Y][MIN] = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
             }
-            if y_index + word_and_letter.n_letters_after > crossword.edges[Y][MAX] {
-                crossword.edges[Y][MAX] = y_index + word_and_letter.n_letters_after;
+            if cross_data.y_index + cross_data.word_and_letter.n_letters_after > crossword.edges[Y][MAX] {
+                crossword.edges[Y][MAX] = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
             }
         }
     }
@@ -198,18 +201,61 @@ fn insert_word(
     return insertable;
 }
 
-fn can_fit_word_in_crossword(index: usize, word_and_letter: &WordAndLetter, crossword_width: usize) -> bool {
+fn can_fit_word_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> bool {
     let can_fit;
-    if word_and_letter.n_letters_before > index {
+    let index;
+    let crossword_width;
+
+    match *cross_data.direction {
+        Direction::Across => {
+            index = cross_data.x_index;
+            crossword_width = crossword.letters.len();
+        }
+        _ => {
+            index = cross_data.y_index;
+            crossword_width = crossword.letters[0].len();
+        }
+    }
+
+    if cross_data.word_and_letter.n_letters_before > index {
         can_fit = false;
-    } else if index + word_and_letter.n_letters_after > crossword_width - 1 {
+    } else if index + cross_data.word_and_letter.n_letters_after > crossword_width - 1 {
         can_fit = false;
     } else {
         can_fit = true;
     }
+
     return can_fit;
 }
+/*
+fn all_letters_in_path_match(x_index: usize, y_index: usize, direction: &Direction, word_and_letter: &WordAndLetter, crossword: &Crossword) -> bool {
 
+    let mut all_letters_match = true;
+
+    let mut x = x_index;
+    let mut y = y_index;
+
+    match *direction {
+        Direction::Across => x -= word_and_letter.n_letters_before,
+        Direction::Down => y -= word_and_letter.n_letters_before,
+        _ => all_letters_match = false,
+    }
+
+    for letter in word_and_letter.word.chars() {
+        if crossword.letters[x][y] != EMPTY && crossword.letters[x][y] != letter {
+            all_letters_match = false;
+            break;
+        }
+        match *direction {
+            Direction::Across => x += 1,
+            Direction::Down => y += 1,
+            _ => all_letters_match = false,
+        }
+    }
+
+    all_letters_match = false;
+}
+*/
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
     let comparison;
 
