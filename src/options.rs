@@ -32,6 +32,7 @@ pub fn compare_options(
     crossword: &mut Crossword,
     best_crosswords: &mut Vec<Crossword>) {
 
+    // todo write an iterator on crossword that returns (x_index, y_index, direction)
     for x_index in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
         for y_index in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
             let direction = is_crossable_letter(crossword, x_index, y_index);
@@ -293,22 +294,26 @@ fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
     // TODO FULL of duplication!!
 
     if *cross_data.direction == Direction::Across {
-        for x in cross_data.x_index-cross_data.word_and_letter.n_letters_before..=cross_data.x_index+cross_data.word_and_letter.n_letters_after {
+        for x in cross_data.x_index-cross_data.word_and_letter.n_letters_before
+                 ..=cross_data.x_index+cross_data.word_and_letter.n_letters_after {
             if x == cross_data.x_index {
                 continue;
             } else if (cross_data.y_index > 0 && crossword.letters[x][cross_data.y_index-1] != EMPTY)
-                || (cross_data.y_index < crossword.letters[0].len() - 1 && crossword.letters[x][cross_data.y_index+1] != EMPTY) {
+                || (cross_data.y_index < crossword.letters[0].len() - 1
+                && crossword.letters[x][cross_data.y_index+1] != EMPTY) {
                 continue;
             } else {
                 crossword.letters[x][cross_data.y_index] = EMPTY;
             }
         }
     } else if *cross_data.direction == Direction::Down {
-        for y in cross_data.y_index-cross_data.word_and_letter.n_letters_before..=cross_data.y_index+cross_data.word_and_letter.n_letters_after {
+        for y in cross_data.y_index-cross_data.word_and_letter.n_letters_before
+                 ..=cross_data.y_index+cross_data.word_and_letter.n_letters_after {
             if y == cross_data.y_index {
                 continue;
             } else if (cross_data.x_index > 0 && crossword.letters[cross_data.x_index-1][y] != EMPTY)
-                || (cross_data.x_index < crossword.letters.len() - 1 && crossword.letters[cross_data.x_index+1][y] != EMPTY) {
+                || (cross_data.x_index < crossword.letters.len() - 1
+                && crossword.letters[cross_data.x_index+1][y] != EMPTY) {
                 continue;
             } else {
                 crossword.letters[cross_data.x_index][y] = EMPTY;
