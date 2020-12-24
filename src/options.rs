@@ -83,7 +83,6 @@ fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) ->
 
 fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut crossword: &mut Crossword) -> bool {
 
-    // TODO FULL of duplication!!
     let mut insertable = !words_in_crossword[cross_data.word_and_letter.word_index];
 
     insertable = insertable && can_fit_word_in_crossword(cross_data, crossword);
@@ -100,22 +99,7 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut c
 
     if insertable {
         words_in_crossword[cross_data.word_and_letter.word_index] = true;
-
-        if *cross_data.direction == Direction::Across {
-            if cross_data.x_index - cross_data.word_and_letter.n_letters_before < crossword.edges[X][MIN] {
-                crossword.edges[X][MIN] = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
-            }
-            if cross_data.x_index + cross_data.word_and_letter.n_letters_after > crossword.edges[X][MAX] {
-                crossword.edges[X][MAX] = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
-            }
-        } else if *cross_data.direction == Direction::Down {
-            if cross_data.y_index - cross_data.word_and_letter.n_letters_before < crossword.edges[Y][MIN] {
-                crossword.edges[Y][MIN] = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
-            }
-            if cross_data.y_index + cross_data.word_and_letter.n_letters_after > crossword.edges[Y][MAX] {
-                crossword.edges[Y][MAX] = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
-            }
-        }
+        update_edges_for_insert(cross_data, &mut crossword);
     }
 
     return insertable;
@@ -257,6 +241,16 @@ fn get_x_y_next(cross_data: &CrossData, x: &mut usize, y: &mut usize) {
         Direction::Down => *y += 1,
         _ => (),
     }
+}
+
+fn update_edges_for_insert(cross_data: &CrossData, crossword: &mut Crossword) {
+    let letter_index = if *cross_data.direction == Direction::Across { cross_data.x_index } else { cross_data.y_index };
+    let edge_index = if *cross_data.direction == Direction::Across { X } else { Y };
+
+    crossword.edges[edge_index][MIN] = crossword.edges[edge_index][MIN].min(
+                                       letter_index - cross_data.word_and_letter.n_letters_before);
+    crossword.edges[edge_index][MAX] = crossword.edges[edge_index][MAX].max(
+                                       letter_index + cross_data.word_and_letter.n_letters_after);
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
