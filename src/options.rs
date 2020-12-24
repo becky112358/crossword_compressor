@@ -313,6 +313,24 @@ fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
         }
     }
 
+    update_edges_for_remove(cross_data, crossword);
+
+    words_in_crossword[cross_data.word_and_letter.word_index] = false;
+}
+
+fn get_x_lower_upper(cross_data: &CrossData) -> (usize, usize) {
+    let x_lower = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
+    let x_upper = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
+    return (x_lower, x_upper);
+}
+
+fn get_y_lower_upper(cross_data: &CrossData) -> (usize, usize) {
+    let y_lower = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
+    let y_upper = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
+    return (y_lower, y_upper);
+}
+
+fn update_edges_for_remove(cross_data: &CrossData, crossword: &mut Crossword) {
     if *cross_data.direction == Direction::Across {
         if cross_data.x_index - cross_data.word_and_letter.n_letters_before == crossword.edges[X][MIN] {
             let mut found_edge = false;
@@ -378,20 +396,6 @@ fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
             }
         }
     }
-
-    words_in_crossword[cross_data.word_and_letter.word_index] = false;
-}
-
-fn get_x_lower_upper(cross_data: &CrossData) -> (usize, usize) {
-    let x_lower = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
-    let x_upper = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
-    return (x_lower, x_upper);
-}
-
-fn get_y_lower_upper(cross_data: &CrossData) -> (usize, usize) {
-    let y_lower = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
-    let y_upper = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
-    return (y_lower, y_upper);
 }
 
 
