@@ -62,7 +62,7 @@ impl Crossword {
 
 pub fn initialise_crossword(words: &Vec<&str>, start_word: &str) -> Crossword {
     let sum_of_longest_words = get_sum_of_longest_words(words);
-    let square_size = get_square_size(sum_of_longest_words, start_word.len());
+    let square_size = sum_of_longest_words * 2 + start_word.len();
 
     let mut crossword = Crossword {
         left_edge: sum_of_longest_words,
@@ -107,13 +107,5 @@ fn get_sum_of_longest_words(words: &Vec<&str>) -> usize {
     }
 
     return sum_of_longest_words;
-}
-
-fn get_square_size(half: usize, middle: usize) -> usize {
-    let mut square_size = half * 2 + middle;
-    if square_size % 2 == 0 {
-        square_size += 1;
-    }
-    return square_size;
 }
 
