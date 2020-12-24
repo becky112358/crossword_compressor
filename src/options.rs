@@ -31,7 +31,7 @@ pub fn compare_options(
     crossword: &mut Crossword,
     best_crosswords: &mut Vec<Crossword>) {
 
-    // todo write an iterator on crossword that returns (x_index, y_index, direction)
+    // todo Write an iterator on crossword that returns (x_index, y_index, direction)
     for x_index in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
         for y_index in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
             if let Some(direction) = is_crossable_letter(crossword, x_index, y_index) {
@@ -282,9 +282,12 @@ fn add_crossword(comparison: Comparison, crossword: &Crossword, best_crosswords:
 }
 
 fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, crossword: &mut Crossword) {
+    remove_letters(cross_data, crossword);
+    update_edges_for_remove(cross_data, crossword);
+    words_in_crossword[cross_data.word_and_letter.word_index] = false;
+}
 
-    // TODO FULL of duplication!!
-
+fn remove_letters(cross_data: &CrossData, crossword: &mut Crossword) {
     if *cross_data.direction == Direction::Across {
         let (x_lower, x_upper) = get_x_lower_upper(cross_data);
         let y = cross_data.y_index;
@@ -312,10 +315,6 @@ fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
             }
         }
     }
-
-    update_edges_for_remove(cross_data, crossword);
-
-    words_in_crossword[cross_data.word_and_letter.word_index] = false;
 }
 
 fn get_x_lower_upper(cross_data: &CrossData) -> (usize, usize) {
@@ -331,6 +330,7 @@ fn get_y_lower_upper(cross_data: &CrossData) -> (usize, usize) {
 }
 
 fn update_edges_for_remove(cross_data: &CrossData, crossword: &mut Crossword) {
+    // todo Reduce the duplication
     if *cross_data.direction == Direction::Across {
         if cross_data.x_index - cross_data.word_and_letter.n_letters_before == crossword.edges[X][MIN] {
             let mut found_edge = false;
