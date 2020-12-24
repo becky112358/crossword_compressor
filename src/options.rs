@@ -203,19 +203,9 @@ fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, cross
 
 fn can_fit_word_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> bool {
     let can_fit;
-    let index;
-    let crossword_width;
-
-    match *cross_data.direction {
-        Direction::Across => {
-            index = cross_data.x_index;
-            crossword_width = crossword.letters.len();
-        }
-        _ => {
-            index = cross_data.y_index;
-            crossword_width = crossword.letters[0].len();
-        }
-    }
+    let index = if *cross_data.direction == Direction::Across { cross_data.x_index } else { cross_data.y_index };
+    let crossword_width = if *cross_data.direction == Direction::Across { crossword.letters.len() } 
+                                                                   else { crossword.letters[0].len() };
 
     if cross_data.word_and_letter.n_letters_before > index {
         can_fit = false;
