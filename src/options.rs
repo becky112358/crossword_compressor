@@ -276,8 +276,12 @@ fn add_crossword(comparison: Comparison, crossword: &Crossword, best_crosswords:
     }
 
     match comparison {
-        Comparison::First | Comparison::Better | Comparison::AsGood => best_crosswords.push(crossword.clone_shrink()),
-        Comparison::Worse => (),
+        Comparison::First | Comparison::Better | Comparison::AsGood => {
+            if !best_crosswords.contains(&crossword) {
+                best_crosswords.push(crossword.clone_shrink());
+            }
+        }
+        Comparison::Worse => { }
     }
 }
 

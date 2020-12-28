@@ -12,6 +12,40 @@ pub struct Crossword {
     pub letters: Vec<Vec<char>>,
 }
 
+impl PartialEq for Crossword {
+    fn eq(&self, other: &Self) -> bool {
+        let mut equal = true;
+
+        let x_width = self.edges[X][MAX] - self.edges[X][MIN] + 1;
+        let y_width = self.edges[Y][MAX] - self.edges[Y][MIN] + 1;
+
+        if other.edges[X][MAX] - other.edges[X][MIN] + 1 != x_width {
+            equal = false;
+        } else if other.edges[Y][MAX] - other.edges[Y][MIN] + 1 != y_width {
+            equal = false;
+        } else {
+            for x in 0..x_width {
+                for y in 0..y_width {
+                    let x_self = offset(self, X, x);
+                    let y_self = offset(self, Y, y);
+                    let x_other = offset(other, X, x);
+                    let y_other = offset(other, Y, y);
+                    if self.letters[x_self][y_self] != other.letters[x_other][y_other] {
+                        equal = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return equal;
+    }
+}
+
+fn offset(crossword: &Crossword, index: usize, increment: usize) -> usize {
+    return crossword.edges[index][MIN] + increment;
+}
+
 impl Crossword {
     pub fn get_min_max(&self) -> (usize, usize) {
         let x_len = self.edges[X][MAX] - self.edges[X][MIN] + 1;
