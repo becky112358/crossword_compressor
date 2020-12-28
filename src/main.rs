@@ -8,6 +8,7 @@ use crate::options::compare_options;
 
 fn main() {
     let words = vec![
+        "beginning",
         "hereby",
         "exist",
         "words",
@@ -17,16 +18,15 @@ fn main() {
 
     let letter_map = get_letter_map(&words);
 
-    let mut crossword = initialise_crossword(&words, "beginning");
+    let mut crossword = initialise_crossword(&words);
 
-    let mut words_in_crossword = vec![false; words.len()];
     let mut best_options = vec![];
-    compare_options(&letter_map, &mut words_in_crossword, &mut crossword, &mut best_options);
+    compare_options(&letter_map, &mut crossword, &mut best_options);
 
-    for crossword in &best_options {
-        crossword.print();
-        println!();
-    }
-    println!("{} options", best_options.len());
+//    for crossword in &best_options {
+//        crossword.print();
+//        println!();
+//    }
+//    println!("{} options", best_options.len());
 }
 
