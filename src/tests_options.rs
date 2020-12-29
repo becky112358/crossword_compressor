@@ -4,6 +4,43 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_check_other_direction_overlaps() {
+        let words = vec![
+            "two",
+            "words",
+            "third",
+        ];
+
+        let mut crossword = initialise_crossword(&words);
+        crossword.words[1].cross = Some(CrossData{ position: [2, -1], direction: Direction::Down, order: 1 });
+
+        let word_and_d = WordAndLetter {
+            word_index: 2,
+            word: &words[2],
+            letter: 'd',
+            n_letters_before: 4,
+            letter_index: 4,
+            n_letters_after: 0,
+        };
+
+        assert!(check_other_direction_overlaps(&[-2, 2], &Direction::Across, &word_and_d, &crossword));
+        assert!(!check_other_direction_overlaps(&[-2, 3], &Direction::Across, &word_and_d, &crossword));
+
+        let word_and_t = WordAndLetter {
+            word_index: 2,
+            word: &words[2],
+            letter: 't',
+            n_letters_before: 0,
+            letter_index: 0,
+            n_letters_after: 4,
+        };
+
+        assert!(check_other_direction_overlaps(&[0, 0], &Direction::Down, &word_and_t, &crossword));
+        assert!(!check_other_direction_overlaps(&[0, 0], &Direction::Across, &word_and_t, &crossword));
+        assert!(!check_other_direction_overlaps(&[0, -1], &Direction::Down, &word_and_t, &crossword));
+    }
+
+    #[test]
     fn test_check_letter_intersections() {
         let words = vec![
             "two",

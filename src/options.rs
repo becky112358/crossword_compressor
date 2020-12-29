@@ -131,7 +131,7 @@ fn check_other_direction_overlaps(
     position_start: &[i32; 2],
     direction: &Direction,
     word_and_letter: &WordAndLetter,
-    crossword: &mut Crossword) -> bool {
+    crossword: &Crossword) -> bool {
 
     let mut ok = true;
 
