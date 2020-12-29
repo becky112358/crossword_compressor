@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 pub const X: usize = 0;
 pub const Y: usize = 1;
 
@@ -57,23 +59,8 @@ impl Crossword<'_> {
         return next_order;
     }
 
-    pub fn get_min_max(&self) -> (i32, i32) {
-        let mut x_low = 0;
-        let mut x_high = 0;
-        let mut y_low = 0;
-        let mut y_high = 0;
-
-        for word in &self.words {
-            if let Some(position) = &word.position {
-                x_low = x_low.min(position[X]);
-                x_high = x_high.max(position[X]);
-                y_low = y_low.min(position[Y]);
-                y_high = y_high.max(position[Y]);
-            }
-        }
-
-        let x_width = x_high - x_low;
-        let y_width = y_high - y_low;
+    pub fn get_min_max(&self) -> (usize, usize) {
+        let (_, x_width, _, y_width) = self.get_x_y_width();
 
         let min = x_width.min(y_width);
         let max = x_width.max(y_width);
@@ -93,6 +80,61 @@ impl Crossword<'_> {
 
         return all_crossed;
     }
+
+    pub fn print(&self) {
+        let (x_low, x_width, y_low, y_width) = self.get_x_y_width();
+
+        let mut grid = vec![vec!['x'; y_width]; x_width];
+
+        for word in &self.words {
+            let mut position = [0, 0];
+            let mut index = X;
+            if let Some(start_position) = word.position {
+                position = start_position.clone();
+            }
+            match word.direction {
+                Some(Direction::Across) => index = X,
+                Some(Direction::Down) => index = Y,
+                _ => (),
+            }
+
+            for letter in word.word.chars() {
+                grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()] = letter;
+                position[index] += 1;
+            }
+        }
+
+        for y in 0..y_width {
+            for x in 0..x_width {
+                print!("{}", grid[x][y]);
+            }
+            println!("");
+        }
+
+        println!("\n");
+    }
+
+    fn get_x_y_width(&self) -> (i32, usize, i32, usize) {
+        let mut x_low = 0;
+        let mut x_high = 0;
+        let mut y_low = 0;
+        let mut y_high = 0;
+
+        for word in &self.words {
+            if let Some(position) = &word.position {
+                let position_end = get_position_end(&word);
+                x_low = x_low.min(position[X]);
+                x_high = x_high.max(position_end[X]);
+                y_low = y_low.min(position[Y]);
+                y_high = y_high.max(position_end[Y]);
+            }
+        }
+
+        let x_width = usize::try_from(x_high - x_low).unwrap();
+        let y_width = usize::try_from(y_high - y_low).unwrap();
+
+        return (x_low, x_width, y_low, y_width);
+    }
 }
 
 fn change_direction(input: &Direction) -> Direction {
@@ -109,6 +151,25 @@ fn increment_position(direction: &Direction, position: &mut [i32; 2]) {
         Direction::Across => position[X] += 1,
         Direction::Down => position[Y] += 1,
     }
+}
+
+fn get_position_end(word_cross: &WordCross) -> [i32; 2] {
+
+    let mut index = X;
+    match word_cross.direction {
+        Some(Direction::Across) => index = X,
+        Some(Direction::Down) => index = Y,
+        None => (),
+    }
+
+    let mut position_end = [0, 0];
+    if let Some(position) = word_cross.position {
+        position_end = position.clone();
+    }
+
+    position_end[index] += word_cross.word.len() as i32;
+
+    return position_end;
 }
 
 pub fn initialise_crossword<'a>(words: &'a Vec<&str>) -> Crossword<'a> {
