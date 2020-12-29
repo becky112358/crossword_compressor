@@ -84,7 +84,7 @@ impl Crossword<'_> {
     pub fn print(&self) {
         let (x_low, x_width, y_low, y_width) = self.get_x_y_width();
 
-        let mut grid = vec![vec!['x'; y_width]; x_width];
+        let mut grid = vec![vec![' '; y_width]; x_width];
 
         for word in &self.words {
             let mut position = [0, 0];
