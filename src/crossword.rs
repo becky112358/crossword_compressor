@@ -9,20 +9,20 @@ pub enum Direction {
     Down,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CrossData {
     pub position: [i32; 2],
     pub direction: Direction,
     pub order: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct WordCross<'a> {
     pub word: &'a str,
     pub cross: Option<CrossData>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Crossword<'a> {
     pub words: Vec<WordCross<'a>>,
 }

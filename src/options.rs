@@ -282,3 +282,9 @@ fn remove_word(word_and_letter: &WordAndLetter, crossword: &mut Crossword) {
     crossword.words[word_index].cross = None;
 }
 
+
+#[cfg(test)]
+#[path = "./tests_options.rs"]
+mod tests_options;
+
+
