@@ -4,6 +4,23 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_check_letter_intersections() {
+        let words = vec![
+            "two",
+            "words",
+        ];
+
+        let mut crossword = initialise_crossword(&words);
+        crossword.words[1].cross = Some(CrossData{ position: [1, 0], direction: Direction::Down, order: 1 });
+
+        assert!(check_letter_intersections(&[2, 0], &Direction::Across, 'o', &crossword));
+        assert!(!check_letter_intersections(&[2, 0], &Direction::Across, 'a', &crossword));
+        assert!(check_letter_intersections(&[1, 3], &Direction::Down, 'd', &crossword));
+        assert!(!check_letter_intersections(&[1, 3], &Direction::Down, 'e', &crossword));
+        assert!(check_letter_intersections(&[1, 6], &Direction::Down, 'p', &crossword));
+    }
+
+    #[test]
     fn test_is_duplicate() {
         let words = vec![
             "three",

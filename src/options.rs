@@ -157,8 +157,8 @@ fn check_letter_intersections(position: &[i32; 2], direction: &Direction, letter
 
     for word in &crossword.words {
         if let Some(cross_data) = &word.cross {
-            if cross_data.direction == *direction && cross_data.position[index] == position[index] {
-                let nth = position[other] - cross_data.position[other];
+            if cross_data.direction == *direction && cross_data.position[other] == position[other] {
+                let nth = position[index] - cross_data.position[index];
                 if nth >= 0 && nth < word.word.len() as i32 {
                     for (i, word_letter) in word.word.chars().enumerate() {
                         if i as i32 == nth {
