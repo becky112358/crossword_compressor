@@ -44,7 +44,7 @@ mod tests {
     }
 
     #[test]
-    fn test_add_crossword_as_good() {
+    fn test_add_crossword_as_good_worse_seed_duplicate() {
         let words0 = vec![
             "two",
             "words",
@@ -59,6 +59,14 @@ mod tests {
 
         let mut best_crosswords = vec![crossword1];
 
+        assert_eq!(1, best_crosswords.len());
+        assert!(!best_crosswords.contains(&crossword0));
+
+        add_crossword(Comparison::Worse, &crossword0, &mut best_crosswords);
+        assert_eq!(1, best_crosswords.len());
+        assert!(!best_crosswords.contains(&crossword0));
+
+        add_crossword(Comparison::SeedDuplicate, &crossword0, &mut best_crosswords);
         assert_eq!(1, best_crosswords.len());
         assert!(!best_crosswords.contains(&crossword0));
 
