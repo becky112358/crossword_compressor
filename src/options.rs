@@ -58,12 +58,8 @@ fn insert_word(
     insertable = insertable && check_other_direction_overlaps();
 
     if insertable {
-        let mut word_start_position = position.clone();
-        let index = match direction { Direction::Across => X, Direction::Down => Y, };
-        word_start_position[index] -= word_and_letter.n_letters_before as i32;
-
         let cross_data = CrossData {
-            position: word_start_position,
+            position: position_start,
             direction: direction.clone(),
             order: crossword.get_next_order(),
         };
