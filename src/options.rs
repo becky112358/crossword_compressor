@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::crossword::{CrossData, Crossword, Direction, WordCross};
+use crate::crossword::{CrossData, Crossword, Direction};
 use crate::letter_map::WordAndLetter;
 
 #[derive(PartialEq)]
@@ -255,25 +255,8 @@ fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_cro
     }
 
     match comparison {
-        Comparison::First | Comparison::Better | Comparison::AsGood => {
-
-            // todo yuck
-            let mut word_cross_vec = Vec::with_capacity(crossword.words.len());
-
-            for index in 0..crossword.words.len() {
-                let word_cross = WordCross {
-                    word: crossword.words[index].word,
-                    cross: crossword.words[index].cross.clone(),
-                };
-                word_cross_vec.push(word_cross);
-            }
-            let good_crossword = Crossword {
-                words: word_cross_vec,
-            };
-
-            best_crosswords.push(good_crossword);
-        }
-        Comparison::Worse | Comparison::SeedDuplicate => {}
+        Comparison::First | Comparison::Better | Comparison::AsGood => best_crosswords.push(crossword.clone()),
+        Comparison::Worse | Comparison::SeedDuplicate => (),
     }
 }
 
