@@ -17,6 +17,8 @@ pub fn compare_options<'a>(
     crossword: &mut Crossword<'a>,
     best_crosswords: &mut Vec<Crossword<'a>>) {
 
+    crossword.print();
+
     for (letter, position, direction) in crossword.crossable_letters() {
         if let Some(crossable_words) = letter_map.get(&letter) {
             for word_and_letter in crossable_words {
@@ -50,7 +52,7 @@ fn insert_word(
 
     insertable = insertable && check_no_same_direction_overlaps(&position_start, &position_end, direction, crossword);
 
-    insertable = insertable && check_other_direction_overlaps();
+    insertable = insertable && check_other_direction_overlaps(&position_start, direction, word_and_letter, crossword);
 
     if insertable {
         let cross_data = CrossData {
@@ -125,10 +127,55 @@ fn check_row_clear(z: usize, row: i32, start: i32, end: i32, crossword: &Crosswo
     return clear;
 }
 
-// todo write function
-fn check_other_direction_overlaps() -> bool {
+fn check_other_direction_overlaps(
+    position_start: &[i32; 2],
+    direction: &Direction,
+    word_and_letter: &WordAndLetter,
+    crossword: &mut Crossword) -> bool {
 
-    return true;
+    let mut ok = true;
+
+    let mut position = position_start.clone();
+    let index = direction.get_index();
+    let other_direction = direction.change();
+
+    for letter in word_and_letter.word.chars() {
+        if !check_letter_intersections(&position, &other_direction, letter, crossword) {
+            ok = false;
+            break;
+        }
+        position[index] += 1;
+    }
+
+    return ok;
+}
+
+fn check_letter_intersections(position: &[i32; 2], direction: &Direction, letter: char, crossword: &Crossword) -> bool {
+    let mut ok = true;
+    let index = direction.get_index();
+    let other = (index + 1) % 2;
+
+    for word in &crossword.words {
+        if let Some(cross_data) = &word.cross {
+            if cross_data.direction == *direction && cross_data.position[index] == position[index] {
+                let nth = position[other] - cross_data.position[other];
+                if nth >= 0 && nth < word.word.len() as i32 {
+                    for (i, word_letter) in word.word.chars().enumerate() {
+                        if i as i32 == nth {
+                            ok = ok && word_letter == letter;
+                            break;
+                        }
+                    }
+                }
+
+                if !ok {
+                    break;
+                }
+            }
+        }
+    }
+
+    return ok;
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {

@@ -32,6 +32,12 @@ impl Direction {
         let index = match self { Direction::Across => X, Direction::Down => Y, };
         return index;
     }
+
+    pub fn change(&self) -> Direction {
+        let output = match self { Direction::Across => Direction::Down, Direction::Down => Direction::Across, };
+        return output;
+    }
+
 }
 
 impl Crossword<'_> {
@@ -44,7 +50,7 @@ impl Crossword<'_> {
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
-                direction = change_direction(&cross_data.direction);
+                direction = cross_data.direction.change();
                 position = cross_data.position.clone();
                 let index = cross_data.direction.get_index();
 
@@ -95,7 +101,7 @@ impl Crossword<'_> {
     pub fn print(&self) {
         let (x_low, x_width, y_low, y_width) = self.get_x_y_width();
 
-        let mut grid = vec![vec![' '; y_width]; x_width];
+        let mut grid = vec![vec![' '; y_width+1]; x_width+1];
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
@@ -141,15 +147,6 @@ impl Crossword<'_> {
 
         return (x_low, x_width, y_low, y_width);
     }
-}
-
-fn change_direction(input: &Direction) -> Direction {
-    let output;
-    match input {
-        Direction::Across => output = Direction::Down,
-        Direction::Down => output = Direction::Across,
-    }
-    return output;
 }
 
 fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
