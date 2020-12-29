@@ -96,78 +96,49 @@ fn check_no_same_direction_overlaps(
         Direction::Across => {
             start[X] -= 1;
             end[X] += 1;
-            clear = clear && check_row_clear(&start, &end, crossword);
+            clear = clear && check_row_clear(start[Y], X, &start, &end, crossword);
             start[X] += 1;
             end[X] -= 1;
             start[Y] += 1;
             end[Y] += 1;
-            clear = clear && check_row_clear(&start, &end, crossword);
+            clear = clear && check_row_clear(start[Y], X, &start, &end, crossword);
             start[Y] -= 2;
             end[Y] -= 2;
-            clear = clear && check_row_clear(&start, &end, crossword);
+            clear = clear && check_row_clear(start[Y], X, &start, &end, crossword);
         }
         Direction::Down => {
             start[Y] -= 1;
             end[Y] += 1;
-            clear = clear && check_column_clear(&start, &end, crossword);
+            clear = clear && check_row_clear(start[X], Y, &start, &end, crossword);
             start[Y] += 1;
             end[Y] -= 1;
             start[X] += 1;
             end[X] += 1;
-            clear = clear && check_column_clear(&start, &end, crossword);
+            clear = clear && check_row_clear(start[X], Y, &start, &end, crossword);
             start[X] -= 2;
             end[X] -= 2;
-            clear = clear && check_column_clear(&start, &end, crossword);
+            clear = clear && check_row_clear(start[X], Y, &start, &end, crossword);
         }
     }
 
     return clear;
 }
 
-// todo get rid of duplication
-fn check_row_clear(start: &[i32; 2], end: &[i32; 2], crossword: &Crossword) -> bool {
+fn check_row_clear(row: i32, z: usize, start: &[i32; 2], end: &[i32; 2], crossword: &Crossword) -> bool {
     let mut clear = true;
+
+    let not_z = (z + 1) % 2;
 
     for word in &crossword.words {
         if let Some(position) = word.position {
-            match word.direction {
-                Some(Direction::Across) => {
-                    if position[Y] == start[Y] {
-                        if position[X] <= start[X] && position[X] + word.word.len() as i32 >= start[X] {
-                            clear = false;
-                            break;
-                        } else if position[X] >= start[X] && position[X] <= end[X] {
-                            clear = false;
-                            break;
-                        }
-                    }
+            if position[not_z] == row {
+                if position[z] <= start[z] && position[z] + word.word.len() as i32 >= start[z] {
+                    clear = false;
+                    break;
+                } else if position[z] >= start[z] && position[z] <= end[z] {
+                    clear = false;
+                    break;
                 }
-                _ => { }
-            }
-        }
-    }
-
-    return clear;
-}
-
-fn check_column_clear(start: &[i32; 2], end: &[i32; 2], crossword: &Crossword) -> bool {
-    let mut clear = true;
-
-    for word in &crossword.words {
-        if let Some(position) = word.position {
-            match word.direction {
-                Some(Direction::Down) => {
-                    if position[X] == start[X] {
-                        if position[Y] <= start[Y] && position[Y] + word.word.len() as i32 >= start[Y] {
-                            clear = false;
-                            break;
-                        } else if position[Y] >= start[Y] && position[Y] <= end[Y] {
-                            clear = false;
-                            break;
-                        }
-                    }
-                }
-                _ => { }
             }
         }
     }
