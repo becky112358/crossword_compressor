@@ -10,11 +10,16 @@ pub enum Direction {
 }
 
 #[derive(Clone)]
+pub struct CrossData {
+    pub position: [i32; 2],
+    pub direction: Direction,
+    pub order: usize,
+}
+
+#[derive(Clone)]
 pub struct WordCross<'a> {
     pub word: &'a str,
-    pub position: Option<[i32; 2]>,
-    pub direction: Option<Direction>,
-    pub order: Option<usize>,
+    pub cross: Option<CrossData>,
 }
 
 #[derive(Clone)]
@@ -31,15 +36,13 @@ impl Crossword<'_> {
         let mut position;
 
         for word in &self.words {
-            if let Some(word_direction) = &word.direction {
-                if let Some(word_position) = &word.position {
-                    direction = change_direction(word_direction);
-                    position = word_position.clone();
+            if let Some(cross_data) = &word.cross {
+                direction = change_direction(&cross_data.direction);
+                position = cross_data.position.clone();
 
-                    for letter in word.word.chars() {
-                        output.push((letter, position, direction));
-                        increment_position(&word_direction, &mut position)
-                    }
+                for letter in word.word.chars() {
+                    output.push((letter, position, direction));
+                    increment_position(&cross_data.direction, &mut position);
                 }
             }
         }
@@ -50,8 +53,8 @@ impl Crossword<'_> {
     pub fn get_next_order(&self) -> usize {
         let mut next_order = 0;
         for word in &self.words {
-            if let Some(order) = word.order {
-                next_order = next_order.max(order);
+            if let Some(cross_data) = &word.cross {
+                next_order = next_order.max(cross_data.order);
             }
         }
         next_order += 1;
@@ -72,9 +75,12 @@ impl Crossword<'_> {
         let mut all_crossed = true;
 
         for word in &self.words {
-            if word.order == None {
-                all_crossed = false;
-                break;
+            match word.cross {
+                None => {
+                    all_crossed = false;
+                    break;
+                }
+                _ => {}
             }
         }
 
@@ -89,13 +95,13 @@ impl Crossword<'_> {
         for word in &self.words {
             let mut position = [0, 0];
             let mut index = X;
-            if let Some(start_position) = word.position {
-                position = start_position.clone();
-            }
-            match word.direction {
-                Some(Direction::Across) => index = X,
-                Some(Direction::Down) => index = Y,
-                _ => (),
+            if let Some(cross_data) = &word.cross {
+                position = cross_data.position.clone();
+
+                match cross_data.direction {
+                    Direction::Across => index = X,
+                    Direction::Down => index = Y,
+                }
             }
 
             for letter in word.word.chars() {
@@ -121,11 +127,11 @@ impl Crossword<'_> {
         let mut y_high = 0;
 
         for word in &self.words {
-            if let Some(position) = &word.position {
-                let position_end = get_position_end(&word);
-                x_low = x_low.min(position[X]);
+            if let Some(cross_data) = &word.cross {
+                let position_end = get_position_end(&word.word, &cross_data);
+                x_low = x_low.min(cross_data.position[X]);
                 x_high = x_high.max(position_end[X]);
-                y_low = y_low.min(position[Y]);
+                y_low = y_low.min(cross_data.position[Y]);
                 y_high = y_high.max(position_end[Y]);
             }
         }
@@ -153,21 +159,16 @@ fn increment_position(direction: &Direction, position: &mut [i32; 2]) {
     }
 }
 
-fn get_position_end(word_cross: &WordCross) -> [i32; 2] {
+fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
 
     let mut index = X;
-    match word_cross.direction {
-        Some(Direction::Across) => index = X,
-        Some(Direction::Down) => index = Y,
-        None => (),
+    match cross_data.direction {
+        Direction::Across => index = X,
+        Direction::Down => index = Y,
     }
 
-    let mut position_end = [0, 0];
-    if let Some(position) = word_cross.position {
-        position_end = position.clone();
-    }
-
-    position_end[index] += word_cross.word.len() as i32;
+    let mut position_end = cross_data.position.clone();
+    position_end[index] += word.len() as i32;
 
     return position_end;
 }
@@ -178,16 +179,17 @@ pub fn initialise_crossword<'a>(words: &'a Vec<&str>) -> Crossword<'a> {
     for index in 0..words.len() {
         let word_cross = WordCross {
             word: words[index],
-            position: None,
-            direction: None,
-            order: None,
+            cross: None,
         };
         word_cross_vec.push(word_cross);
     }
 
-    word_cross_vec[0].position = Some([0, 0]);
-    word_cross_vec[0].direction = Some(Direction::Across);
-    word_cross_vec[0].order = Some(0);
+    let first_word_cross_data = CrossData {
+        position: [0, 0],
+        direction: Direction::Across,
+        order: 0,
+    };
+    word_cross_vec[0].cross = Some(first_word_cross_data);
 
     let crossword = Crossword {
         words: word_cross_vec,

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::crossword::{Crossword, Direction, WordCross, X, Y};
+use crate::crossword::{CrossData, Crossword, Direction, WordCross, X, Y};
 use crate::letter_map::WordAndLetter;
 
 #[derive(PartialEq)]
@@ -9,6 +9,7 @@ enum Comparison {
     Better,
     AsGood,
     Worse,
+// todo Add seed subset
 }
 
 pub fn compare_options<'a>(
@@ -43,7 +44,12 @@ fn insert_word(
 
     let word_index = word_and_letter.word_index;
 
-    let mut insertable = crossword.words[word_index].order == None;
+    let mut insertable = true;
+
+    match crossword.words[word_index].cross {
+        None => (),
+        _ => insertable = false,
+    }
 
     let (position_start, position_end) = get_position_start_end(position, direction, word_and_letter);
 
@@ -52,9 +58,13 @@ fn insert_word(
     insertable = insertable && check_other_direction_overlaps();
 
     if insertable {
-        crossword.words[word_index].position = Some(position.clone());
-        crossword.words[word_index].direction = Some(direction.clone());
-        crossword.words[word_index].order = Some(crossword.get_next_order());
+        // todo Bug: position needs to be at start of word, not at letter crossing
+        let cross_data = CrossData {
+            position: position.clone(),
+            direction: direction.clone(),
+            order: crossword.get_next_order(),
+        };
+        crossword.words[word_index].cross = Some(cross_data);
     }
 
     return insertable;
@@ -109,12 +119,12 @@ fn check_row_clear(z: usize, row: i32, start: i32, end: i32, crossword: &Crosswo
     let not_z = (z + 1) % 2;
 
     for word in &crossword.words {
-        if let Some(position) = word.position {
-            if position[not_z] == row {
-                if position[z] <= start && position[z] + word.word.len() as i32 >= start {
+        if let Some(cross_data) = &word.cross {
+            if cross_data.position[not_z] == row {
+                if cross_data.position[z] <= start && cross_data.position[z] + word.word.len() as i32 >= start {
                     clear = false;
                     break;
-                } else if position[z] >= start && position[z] <= end {
+                } else if cross_data.position[z] >= start && cross_data.position[z] <= end {
                     clear = false;
                     break;
                 }
@@ -171,9 +181,7 @@ fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_cro
             for index in 0..crossword.words.len() {
                 let word_cross = WordCross {
                     word: crossword.words[index].word,
-                    position: crossword.words[index].position.clone(),
-                    direction: crossword.words[index].direction.clone(),
-                    order: crossword.words[index].order.clone(),
+                    cross: crossword.words[index].cross.clone(),
                 };
                 word_cross_vec.push(word_cross);
             }
@@ -189,9 +197,6 @@ fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_cro
 
 fn remove_word(word_and_letter: &WordAndLetter, crossword: &mut Crossword) {
     let word_index = word_and_letter.word_index;
-
-    crossword.words[word_index].position = None;
-    crossword.words[word_index].direction = None;
-    crossword.words[word_index].order = None;
+    crossword.words[word_index].cross = None;
 }
 
