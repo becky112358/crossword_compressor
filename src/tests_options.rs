@@ -1,7 +1,25 @@
 #[cfg(test)]
 mod tests {
-    use crate::crossword::{initialise_crossword, X, Y};
+    use crate::crossword::{initialise_crossword};
     use crate::options::*;
+
+    #[test]
+    fn test_check_no_same_direction_overlaps() {
+        let words = vec![
+            "two",
+            "words",
+        ];
+
+        let mut crossword = initialise_crossword(&words);
+        crossword.words[1].cross = Some(CrossData{ position: [2, -1], direction: Direction::Down, order: 1 });
+
+        assert!(check_no_same_direction_overlaps(&[0, 0], &[0, 8], &Direction::Down, &crossword));
+        assert!(!check_no_same_direction_overlaps(&[1, 0], &[1, 8], &Direction::Down, &crossword));
+        assert!(!check_no_same_direction_overlaps(&[2, 0], &[2, 8], &Direction::Down, &crossword));
+        assert!(!check_no_same_direction_overlaps(&[3, 0], &[3, 8], &Direction::Down, &crossword));
+        assert!(check_no_same_direction_overlaps(&[2, 2], &[2, 5], &Direction::Across, &crossword));
+        assert!(!check_no_same_direction_overlaps(&[1, 1], &[1, 6], &Direction::Across, &crossword));
+    }
 
     #[test]
     fn test_check_row_clear() {
@@ -13,13 +31,13 @@ mod tests {
         let mut crossword = initialise_crossword(&words);
         crossword.words[1].cross = Some(CrossData{ position: [2, -1], direction: Direction::Down, order: 1 });
 
-        assert!(check_row_clear(X, 1, -1, 5, &crossword));
-        assert!(check_row_clear(X, 0, -4, -1, &crossword));
-        assert!(!check_row_clear(X, 0, -4, 0, &crossword));
-        assert!(!check_row_clear(X, 0, 1, 8, &crossword));
-        assert!(!check_row_clear(X, 0, -2, 12, &crossword));
-        assert!(check_row_clear(Y, 3, -1, 3, &crossword));
-        assert!(!check_row_clear(Y, 2, 1, 2, &crossword));
+        assert!(check_row_clear(&Direction::Across, 1, -1, 5, &crossword));
+        assert!(check_row_clear(&Direction::Across, 0, -4, -1, &crossword));
+        assert!(!check_row_clear(&Direction::Across, 0, -4, 0, &crossword));
+        assert!(!check_row_clear(&Direction::Across, 0, 1, 8, &crossword));
+        assert!(!check_row_clear(&Direction::Across, 0, -2, 12, &crossword));
+        assert!(check_row_clear(&Direction::Down, 3, -1, 3, &crossword));
+        assert!(!check_row_clear(&Direction::Down, 2, 1, 2, &crossword));
     }
 
     #[test]
