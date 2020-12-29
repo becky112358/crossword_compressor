@@ -3,13 +3,13 @@ use std::convert::TryFrom;
 pub const X: usize = 0;
 pub const Y: usize = 1;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction {
     Across,
     Down,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct CrossData {
     pub position: [i32; 2],
     pub direction: Direction,
@@ -75,12 +75,9 @@ impl Crossword<'_> {
         let mut all_crossed = true;
 
         for word in &self.words {
-            match word.cross {
-                None => {
-                    all_crossed = false;
-                    break;
-                }
-                _ => {}
+            if word.cross == None {
+                all_crossed = false;
+                break;
             }
         }
 

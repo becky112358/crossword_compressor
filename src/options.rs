@@ -44,12 +44,7 @@ fn insert_word(
 
     let word_index = word_and_letter.word_index;
 
-    let mut insertable = true;
-
-    match crossword.words[word_index].cross {
-        None => (),
-        _ => insertable = false,
-    }
+    let mut insertable = crossword.words[word_index].cross == None;
 
     let (position_start, position_end) = get_position_start_end(position, direction, word_and_letter);
 
