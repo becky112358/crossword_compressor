@@ -226,7 +226,7 @@ fn is_duplicate(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> bool
             }
         }
 
-        if subset && order.len() > 1 {
+        if subset {
             for order_index in 0..order.len() {
                 if order[order_index] != good_order[order_index] {
                     subset = false;
