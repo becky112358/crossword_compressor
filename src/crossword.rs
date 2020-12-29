@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
-pub const X: usize = 0;
-pub const Y: usize = 1;
+const X: usize = 0;
+const Y: usize = 1;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction {
