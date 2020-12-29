@@ -27,6 +27,13 @@ pub struct Crossword<'a> {
     pub words: Vec<WordCross<'a>>,
 }
 
+impl Direction {
+    pub fn get_index(&self) -> usize {
+        let index = match self { Direction::Across => X, Direction::Down => Y, };
+        return index;
+    }
+}
+
 impl Crossword<'_> {
     // todo This should return an iterator rather than a vector
     pub fn crossable_letters(&self) -> Vec<(char, [i32; 2], Direction)> {
@@ -39,10 +46,11 @@ impl Crossword<'_> {
             if let Some(cross_data) = &word.cross {
                 direction = change_direction(&cross_data.direction);
                 position = cross_data.position.clone();
+                let index = cross_data.direction.get_index();
 
                 for letter in word.word.chars() {
                     output.push((letter, position, direction));
-                    increment_position(&cross_data.direction, &mut position);
+                    position[index] += 1;
                 }
             }
         }
@@ -90,21 +98,16 @@ impl Crossword<'_> {
         let mut grid = vec![vec![' '; y_width]; x_width];
 
         for word in &self.words {
-            let mut position = [0, 0];
-            let mut index = X;
             if let Some(cross_data) = &word.cross {
-                position = cross_data.position.clone();
+                let mut position = cross_data.position.clone();
+                let index = cross_data.direction.get_index();
 
-                match cross_data.direction {
-                    Direction::Across => index = X,
-                    Direction::Down => index = Y,
+                for lr in word.word.chars() {
+                    grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()]= lr;
+                    position[index] += 1;
                 }
             }
 
-            for letter in word.word.chars() {
-                grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()] = letter;
-                position[index] += 1;
-            }
         }
 
         for y in 0..y_width {
@@ -149,17 +152,9 @@ fn change_direction(input: &Direction) -> Direction {
     return output;
 }
 
-fn increment_position(direction: &Direction, position: &mut [i32; 2]) {
-    match direction {
-        Direction::Across => position[X] += 1,
-        Direction::Down => position[Y] += 1,
-    }
-}
-
 fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
-    let index = match cross_data.direction { Direction::Across => X, Direction::Down => Y, };
-
     let mut position_end = cross_data.position.clone();
+    let index = cross_data.direction.get_index();
     position_end[index] += word.len() as i32;
 
     return position_end;

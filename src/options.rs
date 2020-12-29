@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::crossword::{CrossData, Crossword, Direction, WordCross, X, Y};
+use crate::crossword::{CrossData, Crossword, Direction, WordCross};
 use crate::letter_map::WordAndLetter;
 
 #[derive(PartialEq)]
@@ -69,11 +69,7 @@ fn get_position_start_end(
     direction: &Direction,
     word_and_letter: &WordAndLetter) -> ([i32; 2], [i32; 2]) {
 
-    let index;
-    match *direction {
-        Direction::Across => index = X,
-        Direction::Down => index = Y,
-    }
+    let index = direction.get_index();
 
     let mut position_start = position.clone();
     let mut position_end = position.clone();
@@ -92,7 +88,7 @@ fn check_no_same_direction_overlaps(
 
     let mut clear = true;
 
-    let z = match direction { Direction::Across => X, Direction::Down => Y, };
+    let z = direction.get_index();
 
     let start_z = position_start[z];
     let end_z = position_end[z];
