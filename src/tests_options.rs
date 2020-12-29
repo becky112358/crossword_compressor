@@ -1,7 +1,26 @@
 #[cfg(test)]
 mod tests {
-    use crate::crossword::initialise_crossword;
+    use crate::crossword::{initialise_crossword, X, Y};
     use crate::options::*;
+
+    #[test]
+    fn test_check_row_clear() {
+        let words = vec![
+            "two",
+            "words",
+        ];
+
+        let mut crossword = initialise_crossword(&words);
+        crossword.words[1].cross = Some(CrossData{ position: [2, -1], direction: Direction::Down, order: 1 });
+
+        assert!(check_row_clear(X, 1, -1, 5, &crossword));
+        assert!(check_row_clear(X, 0, -4, -1, &crossword));
+        assert!(!check_row_clear(X, 0, -4, 0, &crossword));
+        assert!(!check_row_clear(X, 0, 1, 8, &crossword));
+        assert!(!check_row_clear(X, 0, -2, 12, &crossword));
+        assert!(check_row_clear(Y, 3, -1, 3, &crossword));
+        assert!(!check_row_clear(Y, 2, 1, 2, &crossword));
+    }
 
     #[test]
     fn test_check_other_direction_overlaps() {
