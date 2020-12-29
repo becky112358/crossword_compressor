@@ -9,7 +9,7 @@ enum Comparison {
     Better,
     AsGood,
     Worse,
-// todo Add seed subset
+    SeedDuplicate,
 }
 
 pub fn compare_options<'a>(
@@ -23,7 +23,7 @@ pub fn compare_options<'a>(
                 if insert_word(&position, &direction, &word_and_letter, crossword) {
                     let crossword_status = compare_crosswords(crossword, best_crosswords);
 
-                    if crossword_status == Comparison::Worse {
+                    if crossword_status == Comparison::Worse || crossword_status == Comparison::SeedDuplicate {
                     } else if crossword.all_words_crossed() {
                         add_crossword(crossword_status, crossword, best_crosswords);
                     } else {
@@ -144,16 +144,61 @@ fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -
         let (current_min, current_max) = best_crosswords[0].get_min_max();
         let (new_min, new_max) = crossword.get_min_max();
 
-        if (new_max < current_max) || (new_max == current_max && new_min < current_min) {
-            comparison = Comparison::Better;
+        if (new_max > current_max) || (new_max == current_max && new_min > current_min) {
+            comparison = Comparison::Worse;
+        } else if is_duplicate(crossword, best_crosswords) {
+            comparison = Comparison::SeedDuplicate;
         } else if (new_max == current_max) && (new_min == current_min) {
             comparison = Comparison::AsGood;
         } else {
-            comparison = Comparison::Worse;
+            comparison = Comparison::Better;
         }
     }
 
     return comparison;
+}
+
+fn is_duplicate(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> bool {
+    let mut duplicate = false;
+
+    for good_crossword in best_crosswords {
+        let mut subset = true;
+
+        let mut order = vec![false; crossword.words.len()];
+        let mut good_order = vec![false; crossword.words.len()];
+
+        for word_index in 0..crossword.words.len() {
+            if let Some(cross_data) = &crossword.words[word_index].cross {
+                if let Some(good_cross_data) = &good_crossword.words[word_index].cross {
+
+                    if cross_data.position != good_cross_data.position
+                    || cross_data.direction != good_cross_data.direction {
+                        subset = false;
+                        break;
+                    }
+
+                    order[cross_data.order] = true;
+                    good_order[good_cross_data.order] = true;
+                }
+            }
+        }
+
+        if subset && order.len() > 1 {
+            for order_index in 0..order.len() {
+                if order[order_index] != good_order[order_index] {
+                    subset = false;
+                    break;
+                }
+            }
+        }
+
+        if subset {
+            duplicate = true;
+            break;
+        }
+    }
+
+    return duplicate;
 }
 
 fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_crosswords: &mut Vec<Crossword<'a>>) {
@@ -185,7 +230,7 @@ fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_cro
 
             best_crosswords.push(good_crossword);
         }
-        Comparison::Worse => {}
+        Comparison::Worse | Comparison::SeedDuplicate => {}
     }
 }
 
