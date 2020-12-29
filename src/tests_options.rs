@@ -41,6 +41,22 @@ mod tests {
     }
 
     #[test]
+    fn test_check_no_other_direction_touches() {
+        let words = vec![
+            "two",
+            "words",
+        ];
+
+        let mut crossword = initialise_crossword(&words);
+        crossword.words[1].cross = Some(CrossData{ position: [2, -1], direction: Direction::Down, order: 1 });
+
+        assert!(check_no_other_direction_touches(&[-2, -2], &[-2, 5], &Direction::Down, &crossword));
+        assert!(!check_no_other_direction_touches(&[-1, -2], &[-1, 5], &Direction::Down, &crossword));
+        assert!(check_no_other_direction_touches(&[0, -1], &[5, -1], &Direction::Across, &crossword));
+        assert!(!check_no_other_direction_touches(&[0, -2], &[5, -2], &Direction::Across, &crossword));
+    }
+
+    #[test]
     fn test_check_other_direction_overlaps() {
         let words = vec![
             "two",

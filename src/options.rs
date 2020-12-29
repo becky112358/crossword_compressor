@@ -50,6 +50,8 @@ fn insert_word(
 
     insertable = insertable && check_no_same_direction_overlaps(&position_start, &position_end, direction, crossword);
 
+    insertable = insertable && check_no_other_direction_touches(&position_start, &position_end, direction, crossword);
+
     insertable = insertable && check_other_direction_overlaps(&position_start, direction, word_and_letter, crossword);
 
     if insertable {
@@ -124,6 +126,38 @@ fn check_row_clear(direction: &Direction, row: i32, start: i32, end: i32, crossw
     }
 
     return clear;
+}
+
+fn check_no_other_direction_touches(
+    position_start: &[i32; 2],
+    position_end: &[i32; 2],
+    direction: &Direction,
+    crossword: &Crossword) -> bool {
+
+    let mut ok = true;
+
+    let other_direction = direction.change();
+    let index = direction.get_index();
+    let other = other_direction.get_index();
+
+    for word in &crossword.words {
+        if let Some(cross_data) = &word.cross {
+            if cross_data.direction == other_direction
+            && cross_data.position[index] >= position_start[index]
+            && cross_data.position[index] <= position_end[index] {
+                if cross_data.position[other] == position_start[other]+1 {
+                    ok = false;
+                } else if cross_data.position[other] + word.word.len() as i32 - 1 == position_start[other]-1 {
+                    ok = false;
+                }
+            }
+        }
+        if !ok {
+            break;
+        }
+    }
+
+    return ok;
 }
 
 fn check_other_direction_overlaps(
