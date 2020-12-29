@@ -61,6 +61,7 @@ mod tests {
         };
 
         assert!(check_other_direction_overlaps(&[-2, 2], &Direction::Across, &word_and_d, &crossword));
+        assert!(!check_other_direction_overlaps(&[-3, 2], &Direction::Across, &word_and_d, &crossword));
         assert!(!check_other_direction_overlaps(&[-2, 3], &Direction::Across, &word_and_d, &crossword));
 
         let word_and_t = WordAndLetter {

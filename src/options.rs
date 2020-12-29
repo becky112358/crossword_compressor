@@ -17,8 +17,6 @@ pub fn compare_options<'a>(
     crossword: &mut Crossword<'a>,
     best_crosswords: &mut Vec<Crossword<'a>>) {
 
-    crossword.print();
-
     for (letter, position, direction) in crossword.crossable_letters() {
         if let Some(crossable_words) = letter_map.get(&letter) {
             for word_and_letter in crossable_words {
@@ -140,13 +138,19 @@ fn check_other_direction_overlaps(
     let index = direction.get_index();
     let other_direction = direction.change();
 
+    position[index] -= 1;
+    ok = ok && check_letter_intersections(&position, &other_direction, ' ', crossword);
+
     for letter in word_and_letter.word.chars() {
-        if !check_letter_intersections(&position, &other_direction, letter, crossword) {
-            ok = false;
+        position[index] += 1;
+        if !ok {
             break;
         }
-        position[index] += 1;
+        ok = ok && check_letter_intersections(&position, &other_direction, letter, crossword);
     }
+
+    position[index] += 1;
+    ok = ok && check_letter_intersections(&position, &other_direction, ' ', crossword);
 
     return ok;
 }
