@@ -4,6 +4,28 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_is_duplicate_is_duplicate() {
+        let words = vec![
+            "three",
+            "words",
+            "here",
+        ];
+
+        let mut crossword0 = initialise_crossword(&words);
+        let mut crossword1 = initialise_crossword(&words);
+
+        crossword0.words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 1 });
+        crossword0.words[2].cross = Some(CrossData{ position: [4, -1], direction: Direction::Down, order: 2 });
+
+        crossword1.words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 2 });
+        crossword1.words[2].cross = Some(CrossData{ position: [4, -1], direction: Direction::Down, order: 1 });
+
+        let best_crosswords = vec![crossword1];
+
+        assert!(is_duplicate(&crossword0, &best_crosswords));
+    }
+
+    #[test]
     fn test_add_crossword_first() {
         let words = vec![
             "two",
