@@ -160,12 +160,7 @@ fn increment_position(direction: &Direction, position: &mut [i32; 2]) {
 }
 
 fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
-
-    let mut index = X;
-    match cross_data.direction {
-        Direction::Across => index = X,
-        Direction::Down => index = Y,
-    }
+    let index = match cross_data.direction { Direction::Across => X, Direction::Down => Y, };
 
     let mut position_end = cross_data.position.clone();
     position_end[index] += word.len() as i32;
