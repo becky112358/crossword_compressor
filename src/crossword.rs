@@ -7,39 +7,91 @@ pub enum Direction {
     Down,
 }
 
+#[derive(Clone)]
 pub struct WordCross<'a> {
     pub word: &'a str,
-    pub location: Option<[usize; 2]>,
+    pub position: Option<[i32; 2]>,
     pub direction: Option<Direction>,
     pub order: Option<usize>,
 }
 
+#[derive(Clone)]
 pub struct Crossword<'a> {
     pub words: Vec<WordCross<'a>>,
 }
 
 impl Crossword<'_> {
-    pub fn crossable_letters(&self) -> Vec<(char, [usize; 2], Direction)> {
+    // todo This should return an iterator rather than a vector
+    pub fn crossable_letters(&self) -> Vec<(char, [i32; 2], Direction)> {
 
         let mut output = Vec::new();
         let mut direction;
-        let mut location;
+        let mut position;
 
         for word in &self.words {
             if let Some(word_direction) = &word.direction {
-                if let Some(word_location) = &word.location {
+                if let Some(word_position) = &word.position {
                     direction = change_direction(word_direction);
-                    location = word_location.clone();
+                    position = word_position.clone();
 
                     for letter in word.word.chars() {
-                        output.push((letter, location, direction));
-                        increment_location(&word_direction, &mut location)
+                        output.push((letter, position, direction));
+                        increment_position(&word_direction, &mut position)
                     }
                 }
             }
         }
 
         return output;
+    }
+
+    pub fn get_next_order(&self) -> usize {
+        let mut next_order = 0;
+        for word in &self.words {
+            if let Some(order) = word.order {
+                next_order = next_order.max(order);
+            }
+        }
+        next_order += 1;
+
+        return next_order;
+    }
+
+    pub fn get_min_max(&self) -> (i32, i32) {
+        let mut x_low = 0;
+        let mut x_high = 0;
+        let mut y_low = 0;
+        let mut y_high = 0;
+
+        for word in &self.words {
+            if let Some(position) = &word.position {
+                x_low = x_low.min(position[X]);
+                x_high = x_high.max(position[X]);
+                y_low = y_low.min(position[Y]);
+                y_high = y_high.max(position[Y]);
+            }
+        }
+
+        let x_width = x_high - x_low;
+        let y_width = y_high - y_low;
+
+        let min = x_width.min(y_width);
+        let max = x_width.max(y_width);
+
+        return (min, max);
+    }
+
+    pub fn all_words_crossed(&self) -> bool {
+        let mut all_crossed = true;
+
+        for word in &self.words {
+            if word.order == None {
+                all_crossed = false;
+                break;
+            }
+        }
+
+        return all_crossed;
     }
 }
 
@@ -52,10 +104,10 @@ fn change_direction(input: &Direction) -> Direction {
     return output;
 }
 
-fn increment_location(direction: &Direction, location: &mut [usize; 2]) {
+fn increment_position(direction: &Direction, position: &mut [i32; 2]) {
     match direction {
-        Direction::Across => location[X] += 1,
-        Direction::Down => location[Y] += 1,
+        Direction::Across => position[X] += 1,
+        Direction::Down => position[Y] += 1,
     }
 }
 
@@ -65,14 +117,14 @@ pub fn initialise_crossword<'a>(words: &'a Vec<&str>) -> Crossword<'a> {
     for index in 0..words.len() {
         let word_cross = WordCross {
             word: words[index],
-            location: None,
+            position: None,
             direction: None,
             order: None,
         };
         word_cross_vec.push(word_cross);
     }
 
-    word_cross_vec[0].location = Some([0, 0]);
+    word_cross_vec[0].position = Some([0, 0]);
     word_cross_vec[0].direction = Some(Direction::Across);
     word_cross_vec[0].order = Some(0);
 

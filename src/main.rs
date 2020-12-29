@@ -23,6 +23,7 @@ fn main() {
     let mut best_options = vec![];
     compare_options(&letter_map, &mut crossword, &mut best_options);
 
+    // todo
 //    for crossword in &best_options {
 //        crossword.print();
 //        println!();

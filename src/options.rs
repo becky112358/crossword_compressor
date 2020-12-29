@@ -1,14 +1,7 @@
-
 use std::collections::HashMap;
 
-use crate::crossword::{Crossword, EMPTY, X, Y, MIN, MAX};
+use crate::crossword::{Crossword, Direction, WordCross, X, Y};
 use crate::letter_map::WordAndLetter;
-
-#[derive(PartialEq)]
-enum Direction {
-    Across,
-    Down,
-}
 
 #[derive(PartialEq)]
 enum Comparison {
@@ -18,230 +11,174 @@ enum Comparison {
     Worse,
 }
 
-struct CrossData<'a> {
-    x_index: usize,
-    y_index: usize,
-    direction: &'a Direction,
-    word_and_letter: &'a WordAndLetter<'a>,
-}
-
-pub fn compare_options(
+pub fn compare_options<'a>(
     letter_map: &HashMap<char, Vec<WordAndLetter>>,
-    mut words_in_crossword: &mut Vec<bool>,
-    crossword: &mut Crossword,
-    best_crosswords: &mut Vec<Crossword>) {
+    crossword: &mut Crossword<'a>,
+    best_crosswords: &mut Vec<Crossword<'a>>) {
 
-    // todo Write an iterator on crossword that returns (x_index, y_index, direction)
-    for x_index in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
-        for y_index in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
-            if let Some(direction) = is_crossable_letter(crossword, x_index, y_index) {
-                if let Some(crossable_words) = letter_map.get(&crossword.letters[x_index][y_index]) {
-                    for word_and_letter in crossable_words {
+    for (letter, position, direction) in crossword.crossable_letters() {
+        if let Some(crossable_words) = letter_map.get(&letter) {
+            for word_and_letter in crossable_words {
+                if insert_word(&position, &direction, &word_and_letter, crossword) {
+                    let crossword_status = compare_crosswords(crossword, best_crosswords);
 
-                        let cross_data = CrossData {
-                            x_index,
-                            y_index,
-                            direction: &direction,
-                            word_and_letter: &word_and_letter };
-
-                        if insert_word(&cross_data, &mut words_in_crossword, crossword) {
-                            let crossword_status = compare_crosswords(crossword, best_crosswords);
-                            if crossword_status == Comparison::Worse {
-                            } else if words_in_crossword.contains(&false) {
-                                compare_options(letter_map, words_in_crossword, crossword, best_crosswords);
-                            } else {
-                                add_crossword(crossword_status, crossword, best_crosswords);
-                            }
-                            remove_word(&cross_data, &mut words_in_crossword, crossword);
-                        }
+                    if crossword_status == Comparison::Worse {
+                    } else if crossword.all_words_crossed() {
+                        add_crossword(crossword_status, crossword, best_crosswords);
+                    } else {
+                        compare_options(letter_map, crossword, best_crosswords);
                     }
+                    remove_word(&word_and_letter, crossword);
                 }
             }
         }
     }
 }
 
-fn is_crossable_letter(crossword: &Crossword, x_index: usize, y_index: usize) -> Option<Direction> {
-    let direction;
+fn insert_word(
+    position: &[i32; 2],
+    direction: &Direction,
+    word_and_letter: &WordAndLetter,
+    crossword: &mut Crossword) -> bool {
 
-    if crossword.letters[x_index][y_index] == EMPTY {
-        direction = None;
-    } else if (x_index == 0 || crossword.letters[x_index-1][y_index] == EMPTY)
-            && (x_index == crossword.letters.len() - 1 || crossword.letters[x_index+1][y_index] == EMPTY) {
-        direction = Some(Direction::Across);
-    } else if (y_index == 0 || crossword.letters[x_index][y_index-1] == EMPTY)
-            && (y_index == crossword.letters[0].len() - 1 || crossword.letters[x_index][y_index+1] == EMPTY) {
-        direction = Some(Direction::Down);
-    } else {
-        direction = None;
-    }
+    let word_index = word_and_letter.word_index;
 
-    return direction;
-}
+    let mut insertable = crossword.words[word_index].order == None;
 
-fn insert_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, mut crossword: &mut Crossword) -> bool {
+    let (position_start, position_end) = get_position_start_end(position, direction, word_and_letter);
 
-    let mut insertable = !words_in_crossword[cross_data.word_and_letter.word_index];
+    insertable = insertable && check_no_same_direction_overlaps(&position_start, &position_end, direction, crossword);
 
-    insertable = insertable && check_word_fits_in_crossword(cross_data, crossword);
-
-    insertable = insertable && check_endpoints(cross_data, crossword);
-
-    insertable = insertable && check_sides_clear_except_at_crosspoints(cross_data, crossword);
-
-    insertable = insertable && check_all_letters_in_path_match(cross_data, crossword);
+    insertable = insertable && check_other_direction_overlaps();
 
     if insertable {
-        write_word(cross_data, &mut crossword);
-        words_in_crossword[cross_data.word_and_letter.word_index] = true;
-        update_edges_for_insert(cross_data, &mut crossword);
+        crossword.words[word_index].position = Some(position.clone());
+        crossword.words[word_index].direction = Some(direction.clone());
+        crossword.words[word_index].order = Some(crossword.get_next_order());
     }
 
     return insertable;
 }
 
-fn check_word_fits_in_crossword(cross_data: &CrossData, crossword: &Crossword) -> bool {
-    let can_fit;
-    let index = if *cross_data.direction == Direction::Across { cross_data.x_index } else { cross_data.y_index };
-    let crossword_width = if *cross_data.direction == Direction::Across { crossword.letters.len() } 
-                                                                   else { crossword.letters[0].len() };
+fn get_position_start_end(
+    position: &[i32; 2],
+    direction: &Direction,
+    word_and_letter: &WordAndLetter) -> ([i32; 2], [i32; 2]) {
 
-    if cross_data.word_and_letter.n_letters_before > index {
-        can_fit = false;
-    } else if index + cross_data.word_and_letter.n_letters_after > crossword_width - 1 {
-        can_fit = false;
-    } else {
-        can_fit = true;
+    let index;
+    match *direction {
+        Direction::Across => index = X,
+        Direction::Down => index = Y,
     }
 
-    return can_fit;
+    let mut position_start = position.clone();
+    let mut position_end = position.clone();
+
+    position_start[index] -= word_and_letter.n_letters_before as i32;
+    position_end[index] += word_and_letter.n_letters_after as i32;
+
+    return (position_start, position_end);
 }
 
-fn check_endpoints(cross_data: &CrossData, crossword: &Crossword) -> bool {
+// todo get rid of duplication
+fn check_no_same_direction_overlaps(
+    position_start: &[i32; 2],
+    position_end: &[i32; 2],
+    direction: &Direction,
+    crossword: &Crossword) -> bool {
+
     let mut clear = true;
 
-    let endpoint_before = cross_data.word_and_letter.n_letters_before + 1;
-    let endpoint_after = cross_data.word_and_letter.n_letters_after + 1;
+    let mut start = position_start.clone();
+    let mut end = position_end.clone();
 
-    if *cross_data.direction == Direction::Across {
-        if cross_data.x_index > cross_data.word_and_letter.n_letters_before
-        && crossword.letters[cross_data.x_index - endpoint_before][cross_data.y_index] != EMPTY {
-            clear = false;
-        } else if cross_data.x_index + cross_data.word_and_letter.n_letters_after < crossword.letters.len() - 1
-               && crossword.letters[cross_data.x_index + endpoint_after][cross_data.y_index] != EMPTY {
-            clear = false;
+    match direction {
+        Direction::Across => {
+            start[X] -= 1;
+            end[X] += 1;
+            clear = clear && check_row_clear(&start, &end, crossword);
+            start[X] += 1;
+            end[X] -= 1;
+            start[Y] += 1;
+            end[Y] += 1;
+            clear = clear && check_row_clear(&start, &end, crossword);
+            start[Y] -= 2;
+            end[Y] -= 2;
+            clear = clear && check_row_clear(&start, &end, crossword);
         }
-    } else if *cross_data.direction == Direction::Down {
-        if cross_data.y_index > cross_data.word_and_letter.n_letters_before
-        && crossword.letters[cross_data.x_index][cross_data.y_index - endpoint_before] != EMPTY {
-            clear = false;
-        } else if cross_data.y_index + cross_data.word_and_letter.n_letters_after < crossword.letters[0].len() - 1
-               && crossword.letters[cross_data.x_index][cross_data.y_index + endpoint_after] != EMPTY {
-            clear = false;
+        Direction::Down => {
+            start[Y] -= 1;
+            end[Y] += 1;
+            clear = clear && check_column_clear(&start, &end, crossword);
+            start[Y] += 1;
+            end[Y] -= 1;
+            start[X] += 1;
+            end[X] += 1;
+            clear = clear && check_column_clear(&start, &end, crossword);
+            start[X] -= 2;
+            end[X] -= 2;
+            clear = clear && check_column_clear(&start, &end, crossword);
         }
     }
 
     return clear;
 }
 
-fn check_sides_clear_except_at_crosspoints(cross_data: &CrossData, crossword: &Crossword) -> bool {
+// todo get rid of duplication
+fn check_row_clear(start: &[i32; 2], end: &[i32; 2], crossword: &Crossword) -> bool {
     let mut clear = true;
 
-    if *cross_data.direction == Direction::Across {
-        let (x_lower, x_upper) = get_x_lower_upper(cross_data);
-        let y = cross_data.y_index;
-        for x in x_lower..=x_upper {
-            if x == cross_data.x_index {
-                continue;
-            }
-
-            if crossword.letters[x][y] == EMPTY {
-                if y > 0 && crossword.letters[x][y-1] != EMPTY {
-                    clear = false;
-                    break;
-                } else if y < crossword.letters[0].len() - 1 && crossword.letters[x][y+1] != EMPTY {
-                    clear = false;
-                    break;
+    for word in &crossword.words {
+        if let Some(position) = word.position {
+            match word.direction {
+                Some(Direction::Across) => {
+                    if position[Y] == start[Y] {
+                        if position[X] <= start[X] && position[X] + word.word.len() as i32 >= start[X] {
+                            clear = false;
+                            break;
+                        } else if position[X] >= start[X] && position[X] <= end[X] {
+                            clear = false;
+                            break;
+                        }
+                    }
                 }
+                _ => { }
             }
-            
-        }
-    } else if *cross_data.direction == Direction::Down {
-        let x = cross_data.x_index;
-        let (y_lower, y_upper) = get_y_lower_upper(cross_data);
-        for y in y_lower..=y_upper {
-            if y == cross_data.y_index {
-                continue;
-            }
-
-            if crossword.letters[x][y] == EMPTY {
-                if x > 0 && crossword.letters[x-1][y] != EMPTY {
-                    clear = false;
-                    break;
-                } else if x < crossword.letters.len() - 1 && crossword.letters[x+1][y] != EMPTY {
-                    clear = false;
-                    break;
-                }
-            }
-            
         }
     }
 
     return clear;
 }
 
-fn check_all_letters_in_path_match(cross_data: &CrossData, crossword: &Crossword) -> bool {
-    let mut all_letters_match = true;
+fn check_column_clear(start: &[i32; 2], end: &[i32; 2], crossword: &Crossword) -> bool {
+    let mut clear = true;
 
-    let (mut x, mut y) = get_x_y_start(cross_data);
-
-    for letter in cross_data.word_and_letter.word.chars() {
-        if crossword.letters[x][y] != EMPTY && crossword.letters[x][y] != letter {
-            all_letters_match = false;
-            break;
+    for word in &crossword.words {
+        if let Some(position) = word.position {
+            match word.direction {
+                Some(Direction::Down) => {
+                    if position[X] == start[X] {
+                        if position[Y] <= start[Y] && position[Y] + word.word.len() as i32 >= start[Y] {
+                            clear = false;
+                            break;
+                        } else if position[Y] >= start[Y] && position[Y] <= end[Y] {
+                            clear = false;
+                            break;
+                        }
+                    }
+                }
+                _ => { }
+            }
         }
-        get_x_y_next(cross_data, &mut x, &mut y);
     }
 
-    return all_letters_match;
+    return clear;
 }
 
-fn write_word(cross_data: &CrossData, crossword: &mut Crossword) {
-    let (mut x, mut y) = get_x_y_start(cross_data);
+// todo write function
+fn check_other_direction_overlaps() -> bool {
 
-    for letter in cross_data.word_and_letter.word.chars() {
-        crossword.letters[x][y] = letter;
-        get_x_y_next(cross_data, &mut x, &mut y);
-    }
-}
-
-fn get_x_y_start(cross_data: &CrossData) -> (usize, usize) {
-    let mut x = cross_data.x_index;
-    let mut y = cross_data.y_index;
-
-    match *cross_data.direction {
-        Direction::Across => x -= cross_data.word_and_letter.n_letters_before,
-        Direction::Down => y -= cross_data.word_and_letter.n_letters_before,
-    }
-
-    return (x, y);
-}
-
-fn get_x_y_next(cross_data: &CrossData, x: &mut usize, y: &mut usize) {
-    match *cross_data.direction {
-        Direction::Across => *x += 1,
-        Direction::Down => *y += 1,
-    }
-}
-
-fn update_edges_for_insert(cross_data: &CrossData, crossword: &mut Crossword) {
-    let letter_index = if *cross_data.direction == Direction::Across { cross_data.x_index } else { cross_data.y_index };
-    let edge_index = if *cross_data.direction == Direction::Across { X } else { Y };
-
-    crossword.edges[edge_index][MIN] = crossword.edges[edge_index][MIN].min(
-                                       letter_index - cross_data.word_and_letter.n_letters_before);
-    crossword.edges[edge_index][MAX] = crossword.edges[edge_index][MAX].max(
-                                       letter_index + cross_data.word_and_letter.n_letters_after);
+    return true;
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
@@ -265,7 +202,7 @@ fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -
     return comparison;
 }
 
-fn add_crossword(comparison: Comparison, crossword: &Crossword, best_crosswords: &mut Vec<Crossword>) {
+fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_crosswords: &mut Vec<Crossword<'a>>) {
     match comparison {
         Comparison::Better => {
             while best_crosswords.len() > 0 {
@@ -277,129 +214,34 @@ fn add_crossword(comparison: Comparison, crossword: &Crossword, best_crosswords:
 
     match comparison {
         Comparison::First | Comparison::Better | Comparison::AsGood => {
-            if !best_crosswords.contains(&crossword) {
-                best_crosswords.push(crossword.clone_shrink());
+
+            // todo yuck
+            let mut word_cross_vec = Vec::with_capacity(crossword.words.len());
+
+            for index in 0..crossword.words.len() {
+                let word_cross = WordCross {
+                    word: crossword.words[index].word,
+                    position: crossword.words[index].position.clone(),
+                    direction: crossword.words[index].direction.clone(),
+                    order: crossword.words[index].order.clone(),
+                };
+                word_cross_vec.push(word_cross);
             }
+            let good_crossword = Crossword {
+                words: word_cross_vec,
+            };
+
+            best_crosswords.push(good_crossword);
         }
-        Comparison::Worse => { }
+        Comparison::Worse => {}
     }
 }
 
-fn remove_word(cross_data: &CrossData, words_in_crossword: &mut Vec<bool>, crossword: &mut Crossword) {
-    remove_letters(cross_data, crossword);
-    update_edges_for_remove(cross_data, crossword);
-    words_in_crossword[cross_data.word_and_letter.word_index] = false;
+fn remove_word(word_and_letter: &WordAndLetter, crossword: &mut Crossword) {
+    let word_index = word_and_letter.word_index;
+
+    crossword.words[word_index].position = None;
+    crossword.words[word_index].direction = None;
+    crossword.words[word_index].order = None;
 }
-
-fn remove_letters(cross_data: &CrossData, crossword: &mut Crossword) {
-    if *cross_data.direction == Direction::Across {
-        let (x_lower, x_upper) = get_x_lower_upper(cross_data);
-        let y = cross_data.y_index;
-        for x in x_lower..=x_upper {
-            if x == cross_data.x_index {
-                continue;
-            } else if (y > 0 && crossword.letters[x][y-1] != EMPTY)
-                   || (y < crossword.letters[0].len() - 1 && crossword.letters[x][y+1] != EMPTY) {
-                continue;
-            } else {
-                crossword.letters[x][y] = EMPTY;
-            }
-        }
-    } else if *cross_data.direction == Direction::Down {
-        let x = cross_data.x_index;
-        let (y_lower, y_upper) = get_y_lower_upper(cross_data);
-        for y in y_lower..=y_upper {
-            if y == cross_data.y_index {
-                continue;
-            } else if (x > 0 && crossword.letters[x-1][y] != EMPTY)
-                   || (x < crossword.letters.len() - 1 && crossword.letters[x+1][y] != EMPTY) {
-                continue;
-            } else {
-                crossword.letters[x][y] = EMPTY;
-            }
-        }
-    }
-}
-
-fn get_x_lower_upper(cross_data: &CrossData) -> (usize, usize) {
-    let x_lower = cross_data.x_index - cross_data.word_and_letter.n_letters_before;
-    let x_upper = cross_data.x_index + cross_data.word_and_letter.n_letters_after;
-    return (x_lower, x_upper);
-}
-
-fn get_y_lower_upper(cross_data: &CrossData) -> (usize, usize) {
-    let y_lower = cross_data.y_index - cross_data.word_and_letter.n_letters_before;
-    let y_upper = cross_data.y_index + cross_data.word_and_letter.n_letters_after;
-    return (y_lower, y_upper);
-}
-
-fn update_edges_for_remove(cross_data: &CrossData, crossword: &mut Crossword) {
-    // todo Reduce the duplication
-    if *cross_data.direction == Direction::Across {
-        if cross_data.x_index - cross_data.word_and_letter.n_letters_before == crossword.edges[X][MIN] {
-            let mut found_edge = false;
-            for x in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
-                for y in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
-                    if crossword.letters[x][y] != EMPTY {
-                        crossword.edges[X][MIN] = x;
-                        found_edge = true;
-                        break;
-                    }
-                }
-                if found_edge {
-                    break;
-                }
-            }
-        }
-
-        if cross_data.x_index + cross_data.word_and_letter.n_letters_after == crossword.edges[X][MAX] {
-            let mut found_edge = false;
-            for x in (crossword.edges[X][MIN]..=crossword.edges[X][MAX]).rev() {
-                for y in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
-                    if crossword.letters[x][y] != EMPTY {
-                        crossword.edges[X][MAX] = x;
-                        found_edge = true;
-                        break;
-                    }
-                }
-                if found_edge {
-                    break;
-                }
-            }
-        }
-    } else if *cross_data.direction == Direction::Down {
-        if cross_data.y_index - cross_data.word_and_letter.n_letters_before == crossword.edges[Y][MIN] {
-            let mut found_edge = false;
-            for y in crossword.edges[Y][MIN]..=crossword.edges[Y][MAX] {
-                for x in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
-                    if crossword.letters[x][y] != EMPTY {
-                        crossword.edges[Y][MIN] = y;
-                        found_edge = true;
-                        break;
-                    }
-                }
-                if found_edge {
-                    break;
-                }
-            }
-        }
-
-        if cross_data.y_index + cross_data.word_and_letter.n_letters_after == crossword.edges[Y][MAX] {
-            let mut found_edge = false;
-            for y in (crossword.edges[Y][MIN]..=crossword.edges[Y][MAX]).rev() {
-                for x in crossword.edges[X][MIN]..=crossword.edges[X][MAX] {
-                    if crossword.letters[x][y] != EMPTY {
-                        crossword.edges[Y][MAX] = y;
-                        found_edge = true;
-                        break;
-                    }
-                }
-                if found_edge {
-                    break;
-                }
-            }
-        }
-    }
-}
-
 

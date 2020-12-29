@@ -22,7 +22,7 @@ mod tests {
         assert_eq!(1, i_entry.len());
         helper_word_and_letter_vector_contains_word_index(&i_entry, 2);
 
-        if let Some(z_entry) = letter_map.get(&'z') {
+        if let Some(_) = letter_map.get(&'z') {
             assert!(false, "No words contain letter z, but the letter map contains a z entry.");
         }
 
