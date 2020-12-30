@@ -21,6 +21,7 @@ pub fn compare_options<'a>(
         if let Some(crossable_words) = letter_map.get(&letter) {
             for word_and_letter in crossable_words {
                 if insert_word(&position, &direction, &word_and_letter, crossword) {
+
                     let crossword_status = compare_crosswords(crossword, best_crosswords);
 
                     if crossword_status == Comparison::Worse || crossword_status == Comparison::SeedDuplicate {
@@ -29,6 +30,7 @@ pub fn compare_options<'a>(
                     } else {
                         compare_options(letter_map, crossword, best_crosswords);
                     }
+
                     remove_word(&word_and_letter, crossword);
                 }
             }
@@ -46,9 +48,9 @@ fn insert_word(
 
     let mut insertable = crossword.words[word_index].cross == None;
 
-    let (full_start, new_start, new_end, new_row) = get_new_start_end_row(position, direction, word_and_letter);
-
     if insertable {
+        let (new_start, new_end, new_row) = get_new_start_end_row(position, direction, word_and_letter);
+
         for word in &crossword.words {
             if let Some(cross_data) = &word.cross {
 
@@ -73,7 +75,7 @@ fn insert_word(
 
     if insertable {
         let cross_data = CrossData {
-            position: full_start,
+            position: get_start_position(position, direction, word_and_letter),
             direction: direction.clone(),
             order: crossword.get_next_order(),
         };
@@ -83,22 +85,16 @@ fn insert_word(
     return insertable;
 }
 
-fn get_new_start_end_row(
-    position: &[i32; 2],
-    direction: &Direction,
-    word_and_letter: &WordAndLetter) -> ([i32; 2], i32, i32, i32) {
+fn get_new_start_end_row(middle: &[i32; 2], direction: &Direction, word_and_letter: &WordAndLetter) -> (i32, i32, i32) {
 
     let index = direction.index();
     let other = direction.change().index();
 
-    let mut full_start = position.clone();
-    full_start[index] -= word_and_letter.letter_index as i32;
+    let start = middle[index] - word_and_letter.letter_index as i32;
+    let end = middle[index] + word_and_letter.n_letters_after as i32;
+    let row = middle[other];
 
-    let start = full_start[index];
-    let end = position[index] + word_and_letter.n_letters_after as i32;
-    let row = position[other];
-
-    return (full_start, start, end, row);
+    return (start, end, row);
 }
 
 fn get_old_start_end_row(word: &str, cross_data: &CrossData) -> (i32, i32, i32) {
@@ -191,6 +187,15 @@ fn get_nth_letter(word: &str, index: i32) -> char {
         }
     }
     return letter;
+}
+
+fn get_start_position(position: &[i32; 2], direction: &Direction, word_and_letter: &WordAndLetter) -> [i32; 2] {
+
+    let mut position_start = position.clone();
+    let index = direction.index();
+    position_start[index] -= word_and_letter.letter_index as i32;
+
+    return position_start;
 }
 
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
