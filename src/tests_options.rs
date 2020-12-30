@@ -4,6 +4,14 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_get_nth_letter() {
+        assert_eq!('e', get_nth_letter("environment", 0));
+        assert_eq!('o', get_nth_letter("environment", 5));
+        assert_eq!('e', get_nth_letter("environment", 8));
+        assert_eq!('t', get_nth_letter("environment", 10));
+    }
+
+    #[test]
     fn test_get_start_position() {
         let word_and_letter = WordAndLetter {
             word_index: 3,
