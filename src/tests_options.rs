@@ -4,6 +4,15 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_check_different_direction() {
+        assert!(check_different_direction(0, 8, 3, "different", -16, -13, 10, "rows"));
+        assert!(!check_different_direction(0, 4, 3, "words", 2, 6, 5, "touch"));
+        assert!(!check_different_direction(9, 16, -4, "clashing", -7, 4, 12, "intersection"));
+        assert!(check_different_direction(9, 18, -4, "acceptable", -7, 4, 12, "intersection"));
+        assert!(check_different_direction(9, 18, -4, "acceptable", -7, 4, 18, "intersection"));
+    }
+
+    #[test]
     fn test_get_nth_letter() {
         assert_eq!('e', get_nth_letter("environment", 0));
         assert_eq!('o', get_nth_letter("environment", 5));
