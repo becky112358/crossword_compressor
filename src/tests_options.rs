@@ -4,6 +4,20 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_get_old_start_end_row() {
+        let mut data = CrossData {
+            position: [-3, 8],
+            direction: Direction::Across,
+            order: 6,
+        };
+
+        assert_eq!((-3, 1, 8), get_old_start_end_row("skies", &data));
+
+        data.direction = Direction::Down;
+        assert_eq!((8, 12, -3), get_old_start_end_row("skies", &data));
+    }
+
+    #[test]
     fn test_check_connecting_word() {
         let words = vec!["lonely".to_string()];
         let crossword = initialise_crossword(&words);
