@@ -28,7 +28,7 @@ pub struct Crossword<'a> {
 }
 
 impl Direction {
-    pub fn get_index(&self) -> usize {
+    pub fn index(&self) -> usize {
         let index = match self { Direction::Across => X, Direction::Down => Y, };
         return index;
     }
@@ -52,7 +52,7 @@ impl Crossword<'_> {
             if let Some(cross_data) = &word.cross {
                 direction = cross_data.direction.change();
                 position = cross_data.position.clone();
-                let index = cross_data.direction.get_index();
+                let index = cross_data.direction.index();
 
                 for letter in word.word.chars() {
                     output.push((letter, position, direction));
@@ -106,7 +106,7 @@ impl Crossword<'_> {
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
                 let mut position = cross_data.position.clone();
-                let index = cross_data.direction.get_index();
+                let index = cross_data.direction.index();
 
                 for lr in word.word.chars() {
                     grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()]= lr;
@@ -151,7 +151,7 @@ impl Crossword<'_> {
 
 fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
     let mut position_end = cross_data.position.clone();
-    let index = cross_data.direction.get_index();
+    let index = cross_data.direction.index();
     position_end[index] += word.len() as i32;
 
     return position_end;
