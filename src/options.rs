@@ -38,24 +38,17 @@ pub fn compare_options<'a>(
     }
 }
 
-fn insert_word(
-    position: &[i32; 2],
-    direction: &Direction,
-    word_and_letter: &WordAndLetter,
-    crossword: &mut Crossword) -> bool {
+fn insert_word(position: &[i32; 2], direction: &Direction, word_l: &WordAndLetter, crossword: &mut Crossword) -> bool {
 
-    let word_index = word_and_letter.word_index;
+    let word_index = word_l.word_index;
 
     let mut insertable = crossword.words[word_index].cross == None;
 
-    insertable = insertable && check_insertable(position, direction, word_and_letter, crossword);
-
-    if insertable {
-    }
+    insertable = insertable && check_insertable(position, direction, word_l, crossword);
 
     if insertable {
         let cross_data = CrossData {
-            position: get_start_position(position, direction, word_and_letter),
+            position: get_start_position(position, direction, word_l),
             direction: direction.clone(),
             order: crossword.get_next_order(),
         };
