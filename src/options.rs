@@ -20,7 +20,7 @@ pub fn compare_options<'a>(
     for (letter, position, direction) in crossword.crossable_letters() {
         if let Some(crossable_words) = letter_map.get(&letter) {
             for word_and_letter in crossable_words {
-                if insert_word(&position, &direction, &word_and_letter, crossword) {
+                if insert_word(&position, direction, &word_and_letter, crossword) {
 
                     let crossword_status = compare_crosswords(crossword, best_crosswords);
 
@@ -38,7 +38,7 @@ pub fn compare_options<'a>(
     }
 }
 
-fn insert_word(position: &[i32; 2], direction: &Direction, word_l: &WordAndLetter, crossword: &mut Crossword) -> bool {
+fn insert_word(position: &[i32; 2], direction: Direction, word_l: &WordAndLetter, crossword: &mut Crossword) -> bool {
 
     let word_index = word_l.word_index;
 
@@ -49,7 +49,7 @@ fn insert_word(position: &[i32; 2], direction: &Direction, word_l: &WordAndLette
     if insertable {
         let cross_data = CrossData {
             position: get_start_position(position, direction, word_l),
-            direction: direction.clone(),
+            direction: direction,
             order: crossword.get_next_order(),
         };
         crossword.words[word_index].cross = Some(cross_data);
@@ -58,7 +58,7 @@ fn insert_word(position: &[i32; 2], direction: &Direction, word_l: &WordAndLette
     return insertable;
 }
 
-fn check_insertable(position: &[i32; 2], direction: &Direction, word_l: &WordAndLetter, crossword: &Crossword) -> bool {
+fn check_insertable(position: &[i32; 2], direction: Direction, word_l: &WordAndLetter, crossword: &Crossword) -> bool {
     let mut insertable = true;
 
     let (new_start, new_end, new_row) = get_new_start_end_row(position, direction, word_l);
@@ -68,7 +68,7 @@ fn check_insertable(position: &[i32; 2], direction: &Direction, word_l: &WordAnd
 
             let (old_start, old_end, old_row) = get_old_start_end_row(word.word, &cross_data);
 
-            if cross_data.direction == *direction {
+            if cross_data.direction == direction {
                 insertable = insertable && check_same_direction(new_start, new_end, new_row,
                                                                 old_start, old_end, old_row, direction, crossword);
             } else {
@@ -85,7 +85,7 @@ fn check_insertable(position: &[i32; 2], direction: &Direction, word_l: &WordAnd
     return insertable;
 }
 
-fn get_new_start_end_row(middle: &[i32; 2], direction: &Direction, word_and_letter: &WordAndLetter) -> (i32, i32, i32) {
+fn get_new_start_end_row(middle: &[i32; 2], direction: Direction, word_and_letter: &WordAndLetter) -> (i32, i32, i32) {
 
     let index = direction.index();
     let other = direction.change().index();
@@ -110,7 +110,7 @@ fn get_old_start_end_row(word: &str, cross_data: &CrossData) -> (i32, i32, i32) 
 
 fn check_same_direction(start0: i32, end0: i32, row0: i32,
                         start1: i32, end1: i32, row1: i32,
-                        direction: &Direction, crossword: &Crossword) -> bool {
+                        direction: Direction, crossword: &Crossword) -> bool {
 
     let ok;
 
@@ -120,9 +120,9 @@ fn check_same_direction(start0: i32, end0: i32, row0: i32,
         if end0 < start1 || end1 < start0 {
             ok = true;
         } else if end0 == start1 {
-            ok = check_intersecting_word(row0, row1, end0, &direction.change(), crossword);
+            ok = check_intersecting_word(row0, row1, end0, direction.change(), crossword);
         } else if end1 == start0 {
-            ok = check_intersecting_word(row0, row1, end1, &direction.change(), crossword);
+            ok = check_intersecting_word(row0, row1, end1, direction.change(), crossword);
         } else {
             ok = false;
         }
@@ -135,12 +135,12 @@ fn check_same_direction(start0: i32, end0: i32, row0: i32,
     return ok;
 }
 
-fn check_intersecting_word(point0: i32, point1: i32, row: i32, direction: &Direction, crossword: &Crossword) -> bool {
+fn check_intersecting_word(point0: i32, point1: i32, row: i32, direction: Direction, crossword: &Crossword) -> bool {
     let mut exists = false;
 
     for word in &crossword.words {
         if let Some(cross_data) = &word.cross {
-            if cross_data.direction == *direction {
+            if cross_data.direction == direction {
                 let index = cross_data.direction.index();
                 let other = cross_data.direction.change().index();
 
@@ -189,7 +189,7 @@ fn get_nth_letter(word: &str, index: i32) -> char {
     return letter;
 }
 
-fn get_start_position(position: &[i32; 2], direction: &Direction, word_and_letter: &WordAndLetter) -> [i32; 2] {
+fn get_start_position(position: &[i32; 2], direction: Direction, word_and_letter: &WordAndLetter) -> [i32; 2] {
 
     let mut position_start = position.clone();
     let index = direction.index();
