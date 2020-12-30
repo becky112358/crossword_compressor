@@ -7,7 +7,7 @@ mod options;
 use crate::options::compare_options;
 
 fn main() {
-    let words = vec![
+    let words_input = vec![
         "beginning",
         "hereby",
         "exist",
@@ -15,6 +15,8 @@ fn main() {
         "for",
         "testing",
     ];
+
+    let words: Vec<String> = words_input.iter().map(|x| x.to_lowercase()).collect();
 
     let letter_map = get_letter_map(&words);
 

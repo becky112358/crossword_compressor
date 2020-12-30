@@ -157,12 +157,12 @@ fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
     return position_end;
 }
 
-pub fn initialise_crossword<'a>(words: &'a Vec<&str>) -> Crossword<'a> {
+pub fn initialise_crossword<'a>(words: &'a Vec<String>) -> Crossword<'a> {
     let mut word_cross_vec = Vec::with_capacity(words.len());
 
     for index in 0..words.len() {
         let word_cross = WordCross {
-            word: words[index],
+            word: &words[index],
             cross: None,
         };
         word_cross_vec.push(word_cross);

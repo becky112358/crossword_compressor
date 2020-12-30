@@ -6,10 +6,10 @@ mod tests {
     #[test]
     fn test_is_duplicate() {
         let words = vec![
-            "three",
-            "words",
-            "here",
-            "surprise",
+            "three".to_string(),
+            "words".to_string(),
+            "here".to_string(),
+            "surprise".to_string(),
         ];
 
         let mut crossword0 = initialise_crossword(&words);
@@ -40,8 +40,8 @@ mod tests {
     #[test]
     fn test_add_crossword_first() {
         let words = vec![
-            "two",
-            "words",
+            "two".to_string(),
+            "words".to_string(),
         ];
 
         let crossword = initialise_crossword(&words);
@@ -56,12 +56,12 @@ mod tests {
     #[test]
     fn test_add_crossword_better() {
         let words0 = vec![
-            "two",
-            "words",
+            "two".to_string(),
+            "words".to_string(),
         ];
         let words1 = vec![
-            "different",
-            "words",
+            "different".to_string(),
+            "words".to_string(),
         ];
 
         let crossword0 = initialise_crossword(&words0);
@@ -80,12 +80,12 @@ mod tests {
     #[test]
     fn test_add_crossword_as_good_worse_seed_duplicate() {
         let words0 = vec![
-            "two",
-            "words",
+            "two".to_string(),
+            "words".to_string(),
         ];
         let words1 = vec![
-            "different",
-            "words",
+            "different".to_string(),
+            "words".to_string(),
         ];
 
         let crossword0 = initialise_crossword(&words0);

@@ -5,15 +5,15 @@ mod tests {
     #[test]
     fn test_get_letter_map() {
         let words = vec![
-            "unlisted",
-            "the",
-            "quick",
-            "brown",
-            "fox",
-            "jumps",
-            "ovEr",
-            "a",
-            "dog",
+            "unlisted".to_string(),
+            "the".to_string(),
+            "quick".to_string(),
+            "brown".to_string(),
+            "fox".to_string(),
+            "jumps".to_string(),
+            "over".to_string(),
+            "a".to_string(),
+            "dog".to_string(),
         ];
 
         let letter_map = get_letter_map(&words);
