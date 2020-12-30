@@ -107,7 +107,7 @@ impl Crossword<'_> {
                 let index = cross_data.direction.index();
 
                 for lr in word.word.chars() {
-                    grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()]= lr;
+                    grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()] = lr;
                     position[index] += 1;
                 }
             }
