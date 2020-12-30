@@ -4,6 +4,18 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_check_intersecting_word() {
+        let words = vec!["lonely".to_string()];
+        let crossword = initialise_crossword(&words);
+
+        assert!(check_intersecting_word(3, 4, 0, Direction::Across, &crossword));
+        assert!(check_intersecting_word(3, 2, 0, Direction::Across, &crossword));
+        assert!(!check_intersecting_word(3, 4, 0, Direction::Down, &crossword));
+        assert!(!check_intersecting_word(3, 4, 1, Direction::Across, &crossword));
+        assert!(!check_intersecting_word(-1, 0, 0, Direction::Across, &crossword));
+    }
+
+    #[test]
     fn test_check_different_direction() {
         assert!(check_different_direction(0, 8, 3, "different", -16, -13, 10, "rows"));
         assert!(!check_different_direction(0, 4, 3, "words", 2, 6, 5, "touch"));
