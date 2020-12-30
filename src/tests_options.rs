@@ -4,6 +4,22 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_get_new_start_end_row() {
+        let word_and_letter = WordAndLetter {
+            word_index: 22,
+            word: "blue",
+            letter: 'u',
+            letter_index: 2,
+            n_letters_after: 1,
+        };
+
+        assert_eq!((-4, -1, -2), get_new_start_end_row(&[-2, -2], Direction::Across, &word_and_letter));
+        assert_eq!((-2, 1, 0), get_new_start_end_row(&[0, 0], Direction::Across, &word_and_letter));
+        assert_eq!((6, 9, 3), get_new_start_end_row(&[8, 3], Direction::Across, &word_and_letter));
+        assert_eq!((-4, -1, -2), get_new_start_end_row(&[-2, -2], Direction::Down, &word_and_letter));
+    }
+
+    #[test]
     fn test_get_old_start_end_row() {
         let mut data = CrossData {
             position: [-3, 8],
