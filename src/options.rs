@@ -48,29 +48,9 @@ fn insert_word(
 
     let mut insertable = crossword.words[word_index].cross == None;
 
+    insertable = insertable && check_insertable(position, direction, word_and_letter, crossword);
+
     if insertable {
-        let (new_start, new_end, new_row) = get_new_start_end_row(position, direction, word_and_letter);
-
-        for word in &crossword.words {
-            if let Some(cross_data) = &word.cross {
-
-                let (old_start, old_end, old_row) = get_old_start_end_row(word.word, &cross_data);
-
-                if cross_data.direction == *direction {
-                    insertable = insertable && check_same_direction(
-                        new_start, new_end, new_row,
-                        old_start, old_end, old_row, direction, crossword);
-                } else {
-                    insertable = insertable && check_different_direction(
-                        new_start, new_end, new_row, word_and_letter.word,
-                        old_start, old_end, old_row, word.word);
-                }
-            }
-
-            if !insertable {
-                break;
-            }
-        }
     }
 
     if insertable {
@@ -80,6 +60,33 @@ fn insert_word(
             order: crossword.get_next_order(),
         };
         crossword.words[word_index].cross = Some(cross_data);
+    }
+
+    return insertable;
+}
+
+fn check_insertable(position: &[i32; 2], direction: &Direction, word_l: &WordAndLetter, crossword: &Crossword) -> bool {
+    let mut insertable = true;
+
+    let (new_start, new_end, new_row) = get_new_start_end_row(position, direction, word_l);
+
+    for word in &crossword.words {
+        if let Some(cross_data) = &word.cross {
+
+            let (old_start, old_end, old_row) = get_old_start_end_row(word.word, &cross_data);
+
+            if cross_data.direction == *direction {
+                insertable = insertable && check_same_direction(new_start, new_end, new_row,
+                                                                old_start, old_end, old_row, direction, crossword);
+            } else {
+                insertable = insertable && check_different_direction(new_start, new_end, new_row, word_l.word,
+                                                                     old_start, old_end, old_row, word.word);
+            }
+        }
+
+        if !insertable {
+            break;
+        }
     }
 
     return insertable;
