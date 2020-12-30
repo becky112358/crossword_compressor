@@ -92,7 +92,7 @@ fn get_new_start_end_row(
     let other = direction.change().index();
 
     let mut full_start = position.clone();
-    full_start[index] -= word_and_letter.n_letters_before as i32;
+    full_start[index] -= word_and_letter.letter_index as i32;
 
     let start = full_start[index];
     let end = position[index] + word_and_letter.n_letters_after as i32;

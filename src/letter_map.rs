@@ -5,7 +5,6 @@ pub struct WordAndLetter<'a> {
     pub word_index: usize,
     pub word: &'a str,
     pub letter: char,
-    pub n_letters_before: usize,
     pub letter_index: usize,
     pub n_letters_after: usize,
 }
@@ -19,7 +18,6 @@ pub fn get_letter_map<'a>(words: &'a Vec<&str>) -> HashMap<char, Vec<WordAndLett
                 word_index,
                 word: words[word_index],
                 letter,
-                n_letters_before: letter_index,
                 letter_index,
                 n_letters_after: words[word_index].len() - letter_index - 1,
             };
