@@ -4,6 +4,20 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_get_start_position() {
+        let word_and_letter = WordAndLetter {
+            word_index: 3,
+            word: "hello",
+            letter: 'l',
+            letter_index: 3,
+            n_letters_after: 1,
+        };
+
+        assert_eq!([4, 6], get_start_position(&[7, 6], Direction::Across, &word_and_letter));
+        assert_eq!([-3, 8], get_start_position(&[-3, 11], Direction::Down, &word_and_letter));
+    }
+
+    #[test]
     fn test_is_duplicate() {
         let words = vec![
             "three".to_string(),
