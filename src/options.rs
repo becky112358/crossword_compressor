@@ -120,9 +120,9 @@ fn check_same_direction(start0: i32, end0: i32, row0: i32,
         if end0 < start1 || end1 < start0 {
             ok = true;
         } else if end0 == start1 {
-            ok = check_intersecting_word(row0, row1, end0, direction.change(), crossword);
+            ok = check_connecting_word(row0, row1, end0, direction.change(), crossword);
         } else if end1 == start0 {
-            ok = check_intersecting_word(row0, row1, end1, direction.change(), crossword);
+            ok = check_connecting_word(row0, row1, end1, direction.change(), crossword);
         } else {
             ok = false;
         }
@@ -135,7 +135,7 @@ fn check_same_direction(start0: i32, end0: i32, row0: i32,
     return ok;
 }
 
-fn check_intersecting_word(point0: i32, point1: i32, row: i32, direction: Direction, crossword: &Crossword) -> bool {
+fn check_connecting_word(point0: i32, point1: i32, row: i32, direction: Direction, crossword: &Crossword) -> bool {
     let mut exists = false;
 
     for word in &crossword.words {
