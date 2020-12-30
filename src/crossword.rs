@@ -45,13 +45,11 @@ impl Crossword<'_> {
     pub fn crossable_letters(&self) -> Vec<(char, [i32; 2], Direction)> {
 
         let mut output = Vec::new();
-        let mut direction;
-        let mut position;
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
-                direction = cross_data.direction.change();
-                position = cross_data.position.clone();
+                let direction = cross_data.direction.change();
+                let mut position = cross_data.position.clone();
                 let index = cross_data.direction.index();
 
                 for letter in word.word.chars() {
