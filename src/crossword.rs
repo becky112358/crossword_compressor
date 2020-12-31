@@ -3,6 +3,8 @@ use std::convert::TryFrom;
 const X: usize = 0;
 const Y: usize = 1;
 
+const SCREEN_WIDTH: usize = 80;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction {
     Across,
@@ -178,5 +180,19 @@ pub fn initialise_crossword<'a>(words: &'a Vec<String>) -> Crossword<'a> {
     };
 
     return crossword;
+}
+
+pub fn print_clear_message(message: &str) {
+    print_stars();
+    println!("{}", message);
+    print_stars();
+    println!("");
+}
+
+fn print_stars() {
+    for _ in 0..SCREEN_WIDTH {
+        print!("*");
+    }
+    println!();
 }
 
