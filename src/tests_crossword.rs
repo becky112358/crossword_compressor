@@ -52,6 +52,17 @@ mod tests {
     }
 
     #[test]
+    fn test_crossword_all_words_crossed() {
+        let mut crossword = helper_get_generic_crossword();
+        assert!(!crossword.all_words_crossed());
+
+        crossword.words[1].cross = Some(CrossData {position: [3, 10], direction: Direction::Across, order: 0});
+        crossword.words[3].cross = Some(CrossData {position: [1, 6], direction: Direction::Across, order: 2});
+        crossword.words[2].cross = Some(CrossData {position: [2, 0], direction: Direction::Down, order: 3});
+        assert!(crossword.all_words_crossed());
+    }
+
+    #[test]
     fn test_crossword_get_x_y_width() {
         let crossword = helper_get_generic_crossword();
         assert_eq!((1, 7, 6, 5), crossword.get_x_y_width());
