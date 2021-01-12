@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
-use crate::crossword::{CrossData, Crossword, Direction, print_clear_message};
+use crate::crossword::{CrossData, Crossword, Direction};
 use crate::letters::WordAndLetter;
+use crate::output::output_clear_message;
 
 #[derive(PartialEq)]
 enum Comparison {
@@ -267,7 +268,7 @@ fn is_duplicate(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> bool
 fn add_crossword<'a>(comparison: Comparison, crossword: &Crossword<'a>, best_crosswords: &mut Vec<Crossword<'a>>) {
     match comparison {
         Comparison::Better => {
-            print_clear_message("Selection improved!");
+            output_clear_message("Selection improved!");
             while best_crosswords.len() > 0 {
                 best_crosswords.pop();
             }
