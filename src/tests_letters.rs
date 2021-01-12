@@ -5,7 +5,6 @@ mod tests {
     #[test]
     fn test_letters_get_map() {
         let words = vec![
-            "unlisted".to_string(),
             "the".to_string(),
             "quick".to_string(),
             "brown".to_string(),
@@ -20,7 +19,7 @@ mod tests {
 
         let i_entry = letter_map.get(&'i').unwrap();
         assert_eq!(1, i_entry.len());
-        helper_word_and_letter_vector_contains_word_index(&i_entry, 2);
+        helper_word_and_letter_vector_contains_word_index(&i_entry, 1);
 
         if let Some(_) = letter_map.get(&'z') {
             assert!(false, "No words contain letter z, but the letter map contains a z entry.");
@@ -28,8 +27,8 @@ mod tests {
 
         let e_entry = letter_map.get(&'e').unwrap();
         assert_eq!(2, e_entry.len());
-        helper_word_and_letter_vector_contains_word_index(&e_entry, 1);
-        helper_word_and_letter_vector_contains_word_index(&e_entry, 6);
+        helper_word_and_letter_vector_contains_word_index(&e_entry, 0);
+        helper_word_and_letter_vector_contains_word_index(&e_entry, 5);
     }
 
     fn helper_word_and_letter_vector_contains_word_index(word_and_letters: &Vec<WordAndLetter>, word_index: usize) {
