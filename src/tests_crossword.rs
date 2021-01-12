@@ -16,12 +16,7 @@ mod tests {
 
     #[test]
     fn test_crossword_crossable_letters() {
-        let crossword = Crossword {
-            words: vec![WordCross {word: "alpha",
-                                   cross: Some(CrossData {position: [5, 6], direction: Direction::Down, order: 1})},
-                        WordCross {word: "bravo",
-                                   cross: Some(CrossData {position: [3, 6], direction: Direction::Across, order: 0})},
-                       ]};
+        let crossword = helper_get_generic_crossword();
 
         let crossable_letters = crossword.crossable_letters();
 
@@ -37,6 +32,24 @@ mod tests {
                         ('o', [7, 6], Direction::Down),
                        ],
                    crossable_letters);
+    }
+
+    #[test]
+    fn test_crossword_get_next_order() {
+        let crossword = helper_get_generic_crossword();
+        assert_eq!(2, crossword.get_next_order());
+    }
+
+    fn helper_get_generic_crossword() -> Crossword<'static> {
+    let crossword = Crossword {
+            words: vec![WordCross {word: "alpha",
+                                   cross: Some(CrossData {position: [5, 6], direction: Direction::Down, order: 1})},
+                        WordCross {word: "bravo",
+                                   cross: Some(CrossData {position: [3, 6], direction: Direction::Across, order: 0})},
+                        WordCross {word: "charlie",
+                                   cross: None},
+                       ]};
+    return crossword;
     }
 }
 
