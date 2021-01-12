@@ -2,7 +2,7 @@
 mod crossword;
 use crate::crossword::{initialise_crossword, print_clear_message};
 mod letters;
-use crate::letters::letters_get_map;
+use crate::letters::{letters_to_lowercase, letters_get_map};
 mod options;
 use crate::options::compare_options;
 
@@ -16,7 +16,7 @@ fn main() {
         "testing",
     ];
 
-    let words: Vec<String> = words_input.iter().map(|x| x.to_lowercase()).collect();
+    let words = letters_to_lowercase(&words_input);
 
     let letter_map = letters_get_map(&words);
 

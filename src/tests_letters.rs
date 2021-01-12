@@ -3,6 +3,21 @@ mod tests {
     use crate::letters::*;
 
     #[test]
+    fn test_letters_to_lowercase() {
+        let words_input = vec![
+            "ALL_UPPERCASE",
+            "mIXeD casE",
+            "all_lowercase",
+        ];
+
+        let words_output = letters_to_lowercase(&words_input);
+
+        assert_eq!("all_uppercase".to_string(), words_output[0]);
+        assert_eq!("mixed case".to_string(), words_output[1]);
+        assert_eq!("all_lowercase".to_string(), words_output[2]);
+    }
+
+    #[test]
     fn test_letters_get_map() {
         let words = vec![
             "the".to_string(),

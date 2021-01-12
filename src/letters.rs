@@ -9,6 +9,10 @@ pub struct WordAndLetter<'a> {
     pub n_letters_after: usize,
 }
 
+pub fn letters_to_lowercase(words: &Vec<&str>) -> Vec<String> {
+    return words.iter().map(|x| x.to_lowercase()).collect();
+}
+
 pub fn letters_get_map<'a>(words: &'a Vec<String>) -> HashMap<char, Vec<WordAndLetter<'a>>> {
     let mut letter_map: HashMap<char, Vec<WordAndLetter>> = HashMap::new();
 
