@@ -45,12 +45,11 @@ mod tests {
         assert_eq!(3, crossword.get_next_order());
     }
 
-//    #[test]
-//    fn test_crossword_get_min_max() {
-//        let crossword = helper_get_generic_crossword();
-//        crossword.print();
-//        assert_eq!((5, 7), crossword.get_min_max());
-//    }
+    #[test]
+    fn test_crossword_get_min_max() {
+        let crossword = helper_get_generic_crossword();
+        assert_eq!((5, 7), crossword.get_min_max());
+    }
 
     #[test]
     fn test_crossword_get_x_y_width() {
