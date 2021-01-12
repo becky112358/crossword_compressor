@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::crossword::{CrossData, Crossword, Direction, print_clear_message};
-use crate::letter_map::WordAndLetter;
+use crate::letters::WordAndLetter;
 
 #[derive(PartialEq)]
 enum Comparison {

@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use crate::letter_map::*;
+    use crate::letters::*;
 
     #[test]
-    fn test_get_letter_map() {
+    fn test_letters_get_map() {
         let words = vec![
             "unlisted".to_string(),
             "the".to_string(),
@@ -16,7 +16,7 @@ mod tests {
             "dog".to_string(),
         ];
 
-        let letter_map = get_letter_map(&words);
+        let letter_map = letters_get_map(&words);
 
         let i_entry = letter_map.get(&'i').unwrap();
         assert_eq!(1, i_entry.len());

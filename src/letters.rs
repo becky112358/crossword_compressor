@@ -9,7 +9,7 @@ pub struct WordAndLetter<'a> {
     pub n_letters_after: usize,
 }
 
-pub fn get_letter_map<'a>(words: &'a Vec<String>) -> HashMap<char, Vec<WordAndLetter<'a>>> {
+pub fn letters_get_map<'a>(words: &'a Vec<String>) -> HashMap<char, Vec<WordAndLetter<'a>>> {
     let mut letter_map: HashMap<char, Vec<WordAndLetter>> = HashMap::new();
 
     for word_index in 1..words.len() {
@@ -32,7 +32,7 @@ pub fn get_letter_map<'a>(words: &'a Vec<String>) -> HashMap<char, Vec<WordAndLe
 
 
 #[cfg(test)]
-#[path = "./tests_letter_map.rs"]
-mod tests_letter_map;
+#[path = "./tests_letters.rs"]
+mod tests_letters;
 
 

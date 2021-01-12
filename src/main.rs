@@ -1,8 +1,8 @@
 
 mod crossword;
 use crate::crossword::{initialise_crossword, print_clear_message};
-mod letter_map;
-use crate::letter_map::get_letter_map;
+mod letters;
+use crate::letters::letters_get_map;
 mod options;
 use crate::options::compare_options;
 
@@ -18,7 +18,7 @@ fn main() {
 
     let words: Vec<String> = words_input.iter().map(|x| x.to_lowercase()).collect();
 
-    let letter_map = get_letter_map(&words);
+    let letter_map = letters_get_map(&words);
 
     let mut crossword = initialise_crossword(&words);
 
