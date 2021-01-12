@@ -180,3 +180,9 @@ pub fn initialise_crossword<'a>(words: &'a Vec<String>) -> Crossword<'a> {
     return crossword;
 }
 
+
+#[cfg(test)]
+#[path = "./tests_crossword.rs"]
+mod tests_crossword;
+
+
