@@ -52,6 +52,12 @@ mod tests {
 //        assert_eq!((5, 7), crossword.get_min_max());
 //    }
 
+    #[test]
+    fn test_crossword_get_x_y_width() {
+        let crossword = helper_get_generic_crossword();
+        assert_eq!((1, 7, 6, 5), crossword.get_x_y_width());
+    }
+
     fn helper_get_generic_crossword() -> Crossword<'static> {
     let crossword = Crossword {
             words: vec![WordCross {word: "alpha",

@@ -125,6 +125,8 @@ impl Crossword<'_> {
     }
 
     fn get_x_y_width(&self) -> (i32, usize, i32, usize) {
+        let mut first_word = true;
+
         let mut x_low = 0;
         let mut x_high = 0;
         let mut y_low = 0;
@@ -133,10 +135,19 @@ impl Crossword<'_> {
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
                 let position_end = get_position_end(&word.word, &cross_data);
-                x_low = x_low.min(cross_data.position[X]);
-                x_high = x_high.max(position_end[X]);
-                y_low = y_low.min(cross_data.position[Y]);
-                y_high = y_high.max(position_end[Y]);
+
+                if first_word {
+                    x_low = cross_data.position[X];
+                    x_high = position_end[X];
+                    y_low = cross_data.position[Y];
+                    y_high = position_end[Y];
+                    first_word = false;
+                } else {
+                    x_low = x_low.min(cross_data.position[X]);
+                    x_high = x_high.max(position_end[X]);
+                    y_low = y_low.min(cross_data.position[Y]);
+                    y_high = y_high.max(position_end[Y]);
+                }
             }
         }
 
