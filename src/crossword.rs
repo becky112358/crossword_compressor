@@ -140,8 +140,8 @@ impl Crossword<'_> {
             }
         }
 
-        let x_width = usize::try_from(x_high - x_low).unwrap();
-        let y_width = usize::try_from(y_high - y_low).unwrap();
+        let x_width = usize::try_from(x_high - x_low + 1).unwrap();
+        let y_width = usize::try_from(y_high - y_low + 1).unwrap();
 
         return (x_low, x_width, y_low, y_width);
     }
@@ -150,7 +150,7 @@ impl Crossword<'_> {
 fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
     let mut position_end = cross_data.position.clone();
     let index = cross_data.direction.index();
-    position_end[index] += word.len() as i32;
+    position_end[index] += word.len() as i32 - 1;
 
     return position_end;
 }

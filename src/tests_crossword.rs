@@ -30,6 +30,11 @@ mod tests {
                         ('a', [5, 6], Direction::Down),
                         ('v', [6, 6], Direction::Down),
                         ('o', [7, 6], Direction::Down),
+                        ('d', [1, 10], Direction::Down),
+                        ('e', [2, 10], Direction::Down),
+                        ('l', [3, 10], Direction::Down),
+                        ('t', [4, 10], Direction::Down),
+                        ('a', [5, 10], Direction::Down),
                        ],
                    crossable_letters);
     }
@@ -37,8 +42,15 @@ mod tests {
     #[test]
     fn test_crossword_get_next_order() {
         let crossword = helper_get_generic_crossword();
-        assert_eq!(2, crossword.get_next_order());
+        assert_eq!(3, crossword.get_next_order());
     }
+
+//    #[test]
+//    fn test_crossword_get_min_max() {
+//        let crossword = helper_get_generic_crossword();
+//        crossword.print();
+//        assert_eq!((5, 7), crossword.get_min_max());
+//    }
 
     fn helper_get_generic_crossword() -> Crossword<'static> {
     let crossword = Crossword {
@@ -48,8 +60,19 @@ mod tests {
                                    cross: Some(CrossData {position: [3, 6], direction: Direction::Across, order: 0})},
                         WordCross {word: "charlie",
                                    cross: None},
+                        WordCross {word: "delta",
+                                   cross: Some(CrossData {position: [1, 10], direction: Direction::Across, order: 2})},
                        ]};
     return crossword;
+    }
+
+    #[test]
+    fn test_get_position_end() {
+        assert_eq!([12, -9],
+                   get_position_end("excitement",
+                                    &CrossData {position: [3, -9], direction: Direction::Across, order: 2}));
+        assert_eq!([-5, 6],
+                   get_position_end("hopeful", &CrossData {position: [-5, 0], direction: Direction::Down, order: 8}));
     }
 }
 
