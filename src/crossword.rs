@@ -11,7 +11,8 @@ pub enum Direction {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CrossData {
-    pub position: [i32; 2],
+    pub row: i32,
+    pub start_point: i32,
     pub direction: Direction,
     pub order: usize,
 }
@@ -39,21 +40,32 @@ impl Direction {
     }
 }
 
+impl CrossData {
+    fn get_position(&self) -> [i32; 2] {
+        let position;
+        match self.direction {
+            Direction::Across => position = [self.row, self.start_point],
+            Direction::Down => position = [self.start_point, self.row],
+        }
+        return position;
+    }
+}
+
 impl Crossword<'_> {
     // todo This should return an iterator rather than a vector
-    pub fn get_crossable_letters(&self) -> Vec<(char, [i32; 2], Direction)> {
+    pub fn get_crossable_letters(&self) -> Vec<(char, i32, i32, Direction)> {
 
         let mut output = Vec::new();
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
                 let direction = cross_data.direction.change();
-                let mut position = cross_data.position.clone();
-                let index = cross_data.direction.index();
+                let mut row = cross_data.start_point;
+                let mid_point = cross_data.row;
 
                 for letter in word.word.chars() {
-                    output.push((letter, position, direction));
-                    position[index] += 1;
+                    output.push((letter, row, mid_point, direction));
+                    row += 1;
                 }
             }
         }
@@ -102,7 +114,7 @@ impl Crossword<'_> {
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
-                let mut position = cross_data.position.clone();
+                let mut position = cross_data.get_position();
                 let index = cross_data.direction.index();
 
                 for lr in word.word.chars() {
@@ -133,18 +145,19 @@ impl Crossword<'_> {
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
+                let position_start = cross_data.get_position();
                 let position_end = get_position_end(&word.word, &cross_data);
 
                 if first_word {
-                    x_low = cross_data.position[X];
+                    x_low = position_start[X];
                     x_high = position_end[X];
-                    y_low = cross_data.position[Y];
+                    y_low = position_start[Y];
                     y_high = position_end[Y];
                     first_word = false;
                 } else {
-                    x_low = x_low.min(cross_data.position[X]);
+                    x_low = x_low.min(position_start[X]);
                     x_high = x_high.max(position_end[X]);
-                    y_low = y_low.min(cross_data.position[Y]);
+                    y_low = y_low.min(position_start[Y]);
                     y_high = y_high.max(position_end[Y]);
                 }
             }
@@ -158,7 +171,7 @@ impl Crossword<'_> {
 }
 
 fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
-    let mut position_end = cross_data.position.clone();
+    let mut position_end = cross_data.get_position();
     let index = cross_data.direction.index();
     position_end[index] += word.len() as i32 - 1;
 
@@ -177,7 +190,8 @@ pub fn crossword_initialise<'a>(words: &'a Vec<String>) -> Crossword<'a> {
     }
 
     let first_word_cross_data = CrossData {
-        position: [0, 0],
+        row: 0,
+        start_point: 0,
         direction: Direction::Across,
         order: 0,
     };

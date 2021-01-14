@@ -18,10 +18,10 @@ pub fn options_compare<'a>(
     crossword: &mut Crossword<'a>,
     best_crosswords: &mut Vec<Crossword<'a>>) {
 
-    for (letter, position, direction) in crossword.get_crossable_letters() {
+    for (letter, row, mid_point, direction) in crossword.get_crossable_letters() {
         if let Some(crossable_words) = letter_map.get(&letter) {
             for word_and_letter in crossable_words {
-                if insert_word(&position, direction, &word_and_letter, crossword) {
+                if insert_word(row, mid_point, direction, &word_and_letter, crossword) {
 
                     let crossword_status = compare_crosswords(crossword, best_crosswords);
 
@@ -39,17 +39,19 @@ pub fn options_compare<'a>(
     }
 }
 
-fn insert_word(position: &[i32; 2], direction: Direction, word_l: &WordAndLetter, crossword: &mut Crossword) -> bool {
+fn insert_word(row: i32, mid_p: i32, direction: Direction, word_l: &WordAndLetter, crossword: &mut Crossword) -> bool {
 
     let word_index = word_l.word_index;
 
     let mut insertable = crossword.words[word_index].cross == None;
 
-    insertable = insertable && check_insertable(position, direction, word_l, crossword);
+    let start_point = mid_p - word_l.letter_index as i32;
+    insertable = insertable && check_insertable(row, start_point, direction, word_l, crossword);
 
     if insertable {
         let cross_data = CrossData {
-            position: get_start_position(position, direction, word_l),
+            row,
+            start_point,
             direction: direction,
             order: crossword.get_next_order(),
         };
@@ -59,21 +61,29 @@ fn insert_word(position: &[i32; 2], direction: Direction, word_l: &WordAndLetter
     return insertable;
 }
 
-fn check_insertable(position: &[i32; 2], direction: Direction, word_l: &WordAndLetter, crossword: &Crossword) -> bool {
+fn check_insertable(
+    new_row: i32,
+    new_start: i32,
+    direction: Direction,
+    word_and_letter: &WordAndLetter,
+    crossword: &Crossword) -> bool {
+
     let mut insertable = true;
 
-    let (new_start, new_end, new_row) = get_new_start_end_row(position, direction, word_l);
+    let new_end = get_end_point(new_start, word_and_letter.word);
 
     for word in &crossword.words {
         if let Some(cross_data) = &word.cross {
 
-            let (old_start, old_end, old_row) = get_old_start_end_row(word.word, &cross_data);
+            let old_start = cross_data.start_point;
+            let old_end = get_end_point(old_start, word.word);
+            let old_row = cross_data.row;
 
             if cross_data.direction == direction {
                 insertable = insertable && check_same_direction(new_start, new_end, new_row,
                                                                 old_start, old_end, old_row, direction, crossword);
             } else {
-                insertable = insertable && check_different_direction(new_start, new_end, new_row, word_l.word,
+                insertable = insertable && check_different_direction(new_start, new_end, new_row, word_and_letter.word,
                                                                      old_start, old_end, old_row, word.word);
             }
         }
@@ -86,27 +96,8 @@ fn check_insertable(position: &[i32; 2], direction: Direction, word_l: &WordAndL
     return insertable;
 }
 
-fn get_new_start_end_row(middle: &[i32; 2], direction: Direction, word_and_letter: &WordAndLetter) -> (i32, i32, i32) {
-
-    let index = direction.index();
-    let other = direction.change().index();
-
-    let start = middle[index] - word_and_letter.letter_index as i32;
-    let end = middle[index] + word_and_letter.n_letters_after as i32;
-    let row = middle[other];
-
-    return (start, end, row);
-}
-
-fn get_old_start_end_row(word: &str, cross_data: &CrossData) -> (i32, i32, i32) {
-    let index = cross_data.direction.index();
-    let other = cross_data.direction.change().index();
-
-    let start = cross_data.position[index];
-    let end = cross_data.position[index] + word.len() as i32 - 1;
-    let row = cross_data.position[other];
-
-    return (start, end, row);
+fn get_end_point(start: i32, word: &str) -> i32 {
+    return start + word.len() as i32 - 1;
 }
 
 fn check_same_direction(start0: i32, end0: i32, row0: i32,
@@ -142,12 +133,9 @@ fn check_connecting_word(point0: i32, point1: i32, row: i32, direction: Directio
     for word in &crossword.words {
         if let Some(cross_data) = &word.cross {
             if cross_data.direction == direction {
-                let index = cross_data.direction.index();
-                let other = cross_data.direction.change().index();
-
-                if cross_data.position[other] == row
-                && cross_data.position[index] <= point0.min(point1)
-                && cross_data.position[index] + word.word.len() as i32 - 1 >= point0.max(point1) {
+                if cross_data.start_point == row
+                && cross_data.row <= point0.min(point1)
+                && cross_data.row + word.word.len() as i32 - 1 >= point0.max(point1) {
                     exists = true;
                     break;
                 }
@@ -190,15 +178,6 @@ fn get_nth_letter(word: &str, index: i32) -> char {
     return letter;
 }
 
-fn get_start_position(position: &[i32; 2], direction: Direction, word_and_letter: &WordAndLetter) -> [i32; 2] {
-
-    let mut position_start = position.clone();
-    let index = direction.index();
-    position_start[index] -= word_and_letter.letter_index as i32;
-
-    return position_start;
-}
-
 fn compare_crosswords(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> Comparison {
     let comparison;
 
@@ -235,7 +214,8 @@ fn is_duplicate(crossword: &Crossword, best_crosswords: &Vec<Crossword>) -> bool
             if let Some(cross_data) = &crossword.words[word_index].cross {
                 if let Some(good_cross_data) = &good_crossword.words[word_index].cross {
 
-                    if cross_data.position != good_cross_data.position
+                    if cross_data.row != good_cross_data.row
+                    || cross_data.start_point != good_cross_data.start_point
                     || cross_data.direction != good_cross_data.direction {
                         subset = false;
                         break;

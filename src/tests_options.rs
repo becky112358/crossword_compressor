@@ -4,33 +4,8 @@ mod tests {
     use crate::options::*;
 
     #[test]
-    fn test_get_new_start_end_row() {
-        let word_and_letter = WordAndLetter {
-            word_index: 22,
-            word: "blue",
-            letter: 'u',
-            letter_index: 2,
-            n_letters_after: 1,
-        };
-
-        assert_eq!((-4, -1, -2), get_new_start_end_row(&[-2, -2], Direction::Across, &word_and_letter));
-        assert_eq!((-2, 1, 0), get_new_start_end_row(&[0, 0], Direction::Across, &word_and_letter));
-        assert_eq!((6, 9, 3), get_new_start_end_row(&[8, 3], Direction::Across, &word_and_letter));
-        assert_eq!((-4, -1, -2), get_new_start_end_row(&[-2, -2], Direction::Down, &word_and_letter));
-    }
-
-    #[test]
-    fn test_get_old_start_end_row() {
-        let mut data = CrossData {
-            position: [-3, 8],
-            direction: Direction::Across,
-            order: 6,
-        };
-
-        assert_eq!((-3, 1, 8), get_old_start_end_row("skies", &data));
-
-        data.direction = Direction::Down;
-        assert_eq!((8, 12, -3), get_old_start_end_row("skies", &data));
+    fn test_get_end_point() {
+        assert_eq!(22, get_end_point(18, "hello"));
     }
 
     #[test]
@@ -63,20 +38,6 @@ mod tests {
     }
 
     #[test]
-    fn test_get_start_position() {
-        let word_and_letter = WordAndLetter {
-            word_index: 3,
-            word: "hello",
-            letter: 'l',
-            letter_index: 3,
-            n_letters_after: 1,
-        };
-
-        assert_eq!([4, 6], get_start_position(&[7, 6], Direction::Across, &word_and_letter));
-        assert_eq!([-3, 8], get_start_position(&[-3, 11], Direction::Down, &word_and_letter));
-    }
-
-    #[test]
     fn test_is_duplicate() {
         let words = vec![
             "three".to_string(),
@@ -89,22 +50,29 @@ mod tests {
         let crossword1 = crossword_initialise(&words);
         let mut best_crosswords = vec![crossword1];
 
-        crossword0.words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 1 });
-        crossword0.words[2].cross = Some(CrossData{ position: [4, -3], direction: Direction::Down, order: 2 });
+        crossword0.words[1].cross = Some(CrossData{ row: -2, start_point: 2, direction: Direction::Down, order: 1 });
+        crossword0.words[2].cross = Some(CrossData{ row: -3, start_point: 4, direction: Direction::Down, order: 2 });
 
-        best_crosswords[0].words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 2 });
-        best_crosswords[0].words[2].cross = Some(CrossData{ position: [4, -3], direction: Direction::Down, order: 1 });
-        best_crosswords[0].words[3].cross = Some(CrossData{ position: [2, 2], direction: Direction::Across, order: 3 });
+        best_crosswords[0].words[1].cross =
+            Some(CrossData{ row: -2, start_point: 2, direction: Direction::Down, order: 2 });
+        best_crosswords[0].words[2].cross =
+            Some(CrossData{ row: -3, start_point: 4, direction: Direction::Down, order: 1 });
+        best_crosswords[0].words[3].cross =
+            Some(CrossData{ row: 2, start_point: 2, direction: Direction::Across, order: 3 });
 
         assert!(is_duplicate(&crossword0, &best_crosswords));
 
-        best_crosswords[0].words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 3 });
-        best_crosswords[0].words[3].cross = Some(CrossData{ position: [2, 2], direction: Direction::Across, order: 2 });
+        best_crosswords[0].words[1].cross =
+            Some(CrossData{ row: -2, start_point: 2, direction: Direction::Down, order: 3 });
+        best_crosswords[0].words[3].cross =
+            Some(CrossData{ row: 2, start_point: 2, direction: Direction::Across, order: 2 });
 
         assert!(!is_duplicate(&crossword0, &best_crosswords));
 
-        best_crosswords[0].words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 2 });
-        best_crosswords[0].words[2].cross = Some(CrossData{ position: [4, -1], direction: Direction::Down, order: 1 });
+        best_crosswords[0].words[1].cross =
+            Some(CrossData{ row: -2, start_point: 2, direction: Direction::Down, order: 2 });
+        best_crosswords[0].words[2].cross =
+            Some(CrossData{ row: -1, start_point: 4, direction: Direction::Down, order: 1 });
         best_crosswords[0].words[3].cross = None;
 
         assert!(!is_duplicate(&crossword0, &best_crosswords));
@@ -171,8 +139,10 @@ mod tests {
             n_letters_after: 2,
         };
         let mut crossword = Crossword {
-            words: vec![WordCross {word: "lonesome",
-                                   cross: Some(CrossData {position: [3, 14], direction: Direction::Across, order: 0})}],
+            words: vec![WordCross {word: "lonesome", cross: Some(CrossData {row: 3,
+                                                                            start_point: 14,
+                                                                            direction: Direction::Across,
+                                                                            order: 0})}],
         };
 
         assert!(crossword.words[word_index].cross != None);

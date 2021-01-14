@@ -8,8 +8,8 @@ Rust
 
 ## Limitations
 
-* In src/crossword.rs, the structure `CrossData` stores the position as a position vector `[x, y]`. It may be better to store position information as a `row` and `start_point`.
-* In src/crossword.rs, `crossable_letters()` returns a vector. It should return an iterator.
+* In src/crossword.rs, `get_crossable_letters()` returns a vector. It should return an iterator.
+* In src/crossword.rs, `get_crossable_letters()` could check whether each letter is actually crossable.
 * Code is not fully unit tested.
 * Code cannot find crossword overlaps of size 2x2 or larger. The code can find overlaps which can be constructed such that at each insertion of one word, the full crossword remains valid. However, for overlaps of size 2x2 or larger, simultaneous insertion of words is required. In future versions this could be resolved with some initial code which specifically checks for square/rectangle overlaps. Example of a 2x2 overlap:
 
