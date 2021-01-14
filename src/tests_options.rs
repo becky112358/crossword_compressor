@@ -9,6 +9,27 @@ mod tests {
     }
 
     #[test]
+    fn test_check_same_direction() {
+        let words = vec!["lonely".to_string()];
+        let crossword = crossword_initialise(&words);
+
+        assert!(check_same_direction(3, 14, 159, 3, 14, 1, Direction::Across, &crossword));
+        assert!(check_same_direction(3, 14, 159, 3, 14, 159265, Direction::Down, &crossword));
+        assert!(check_same_direction(3, 14, 159, -8, 2, 158, Direction::Down, &crossword));
+        assert!(check_same_direction(3, 14, 159, -8, 2, 160, Direction::Across, &crossword));
+        assert!(check_same_direction(3, 14, 159, 15, 16, 158, Direction::Across, &crossword));
+        assert!(check_same_direction(3, 14, 159, 15, 16, 160, Direction::Down, &crossword));
+        assert!(!check_same_direction(3, 14, 159, 0, 4, 158, Direction::Down, &crossword));
+        assert!(!check_same_direction(3, 14, 159, 13, 20, 160, Direction::Across, &crossword));
+        assert!(check_same_direction(3, 14, 159, -20, -4, 159, Direction::Across, &crossword));
+        assert!(check_same_direction(3, 14, 159, 20, 40, 159, Direction::Down, &crossword));
+        assert!(!check_same_direction(3, 14, 159, 0, 8, 159, Direction::Down, &crossword));
+        assert!(!check_same_direction(3, 14, 159, 8, 23, 159, Direction::Across, &crossword));
+        assert!(!check_same_direction(3, 14, 159, 0, 20, 159, Direction::Across, &crossword));
+        assert!(!check_same_direction(3, 14, 159, 5, 8, 159, Direction::Down, &crossword));
+    }
+
+    #[test]
     fn test_check_connecting_word() {
         let words = vec!["lonely".to_string()];
         let crossword = crossword_initialise(&words);
