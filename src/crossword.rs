@@ -44,8 +44,8 @@ impl CrossData {
     fn get_position(&self) -> [i32; 2] {
         let position;
         match self.direction {
-            Direction::Across => position = [self.row, self.start_point],
-            Direction::Down => position = [self.start_point, self.row],
+            Direction::Across => position = [self.start_point, self.row],
+            Direction::Down => position = [self.row, self.start_point],
         }
         return position;
     }

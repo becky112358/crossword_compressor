@@ -20,21 +20,21 @@ mod tests {
 
         let crossable_letters = crossword.get_crossable_letters();
 
-        assert_eq!(vec![('a', 5, 6, Direction::Across),
-                        ('l', 6, 6, Direction::Across),
-                        ('p', 7, 6, Direction::Across),
-                        ('h', 8, 6, Direction::Across),
-                        ('a', 9, 6, Direction::Across),
-                        ('b', 6, 3, Direction::Down),
-                        ('r', 7, 3, Direction::Down),
-                        ('a', 8, 3, Direction::Down),
-                        ('v', 9, 3, Direction::Down),
-                        ('o', 10, 3, Direction::Down),
-                        ('d', 10, 1, Direction::Down),
-                        ('e', 11, 1, Direction::Down),
-                        ('l', 12, 1, Direction::Down),
-                        ('t', 13, 1, Direction::Down),
-                        ('a', 14, 1, Direction::Down),
+        assert_eq!(vec![('a', 6, 5, Direction::Across),
+                        ('l', 7, 5, Direction::Across),
+                        ('p', 8, 5, Direction::Across),
+                        ('h', 9, 5, Direction::Across),
+                        ('a', 10, 5, Direction::Across),
+                        ('b', 3, 6, Direction::Down),
+                        ('r', 4, 6, Direction::Down),
+                        ('a', 5, 6, Direction::Down),
+                        ('v', 6, 6, Direction::Down),
+                        ('o', 7, 6, Direction::Down),
+                        ('d', 1, 10, Direction::Down),
+                        ('e', 2, 10, Direction::Down),
+                        ('l', 3, 10, Direction::Down),
+                        ('t', 4, 10, Direction::Down),
+                        ('a', 5, 10, Direction::Down),
                        ],
                    crossable_letters);
     }
@@ -71,13 +71,13 @@ mod tests {
     fn helper_get_generic_crossword() -> Crossword<'static> {
     let crossword = Crossword {
         words: vec![WordCross {word: "alpha",
-                               cross: Some(CrossData {row: 6, start_point: 5, direction: Direction::Down, order: 1})},
+                               cross: Some(CrossData {row: 5, start_point: 6, direction: Direction::Down, order: 1})},
                     WordCross {word: "bravo",
-                               cross: Some(CrossData {row: 3, start_point: 6, direction: Direction::Across, order: 0})},
+                               cross: Some(CrossData {row: 6, start_point: 3, direction: Direction::Across, order: 0})},
                     WordCross {word: "charlie",
                                cross: None},
                     WordCross {word: "delta",
-                               cross: Some(CrossData {row: 1, start_point: 10, direction: Direction::Across, order: 2})
+                               cross: Some(CrossData {row: 10, start_point: 1, direction: Direction::Across, order: 2})
                               },
                    ]};
     return crossword;
@@ -85,10 +85,10 @@ mod tests {
 
     #[test]
     fn test_get_position_end() {
-        assert_eq!([12, -9],
+        assert_eq!([0, 3],
                    get_position_end("excitement",
                                     &CrossData {row: 3, start_point: -9, direction: Direction::Across, order: 2}));
-        assert_eq!([-5, 6],
+        assert_eq!([0, 1],
                    get_position_end("hopeful",
                                     &CrossData {row: 0, start_point: -5, direction: Direction::Down, order: 8}));
     }
