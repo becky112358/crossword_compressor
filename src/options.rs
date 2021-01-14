@@ -133,9 +133,9 @@ fn check_connecting_word(point0: i32, point1: i32, row: i32, direction: Directio
     for word in &crossword.words {
         if let Some(cross_data) = &word.cross {
             if cross_data.direction == direction {
-                if cross_data.start_point == row
-                && cross_data.row <= point0.min(point1)
-                && cross_data.row + word.word.len() as i32 - 1 >= point0.max(point1) {
+                if cross_data.row == row
+                && cross_data.start_point <= point0.min(point1)
+                && cross_data.start_point + word.word.len() as i32 - 1 >= point0.max(point1) {
                     exists = true;
                     break;
                 }
