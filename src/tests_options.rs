@@ -127,30 +127,6 @@ mod tests {
     }
 
     #[test]
-    fn test_add_crossword_better() {
-        let words0 = vec![
-            "two".to_string(),
-            "words".to_string(),
-        ];
-        let words1 = vec![
-            "different".to_string(),
-            "words".to_string(),
-        ];
-
-        let crossword0 = initialise_crossword(&words0);
-        let crossword1 = initialise_crossword(&words1);
-
-        let mut best_crosswords = vec![crossword1];
-
-        assert_eq!(1, best_crosswords.len());
-        assert!(best_crosswords[0] != crossword0);
-
-        add_crossword(Comparison::Better, &crossword0, &mut best_crosswords);
-        assert_eq!(1, best_crosswords.len());
-        assert_eq!(crossword0, best_crosswords[0]);
-    }
-
-    #[test]
     fn test_add_crossword_as_good_worse_seed_duplicate() {
         let words0 = vec![
             "two".to_string(),
@@ -164,7 +140,7 @@ mod tests {
         let crossword0 = initialise_crossword(&words0);
         let crossword1 = initialise_crossword(&words1);
 
-        let mut best_crosswords = vec![crossword1];
+        let mut best_crosswords = vec![crossword1.clone()];
 
         assert_eq!(1, best_crosswords.len());
         assert!(!best_crosswords.contains(&crossword0));
@@ -179,6 +155,15 @@ mod tests {
 
         add_crossword(Comparison::AsGood, &crossword0, &mut best_crosswords);
         assert_eq!(2, best_crosswords.len());
+        assert!(best_crosswords.contains(&crossword0));
+
+        add_crossword(Comparison::Better, &crossword1, &mut best_crosswords);
+        assert_eq!(1, best_crosswords.len());
+        assert!(best_crosswords.contains(&crossword1));
+        assert!(!best_crosswords.contains(&crossword0));
+
+        add_crossword(Comparison::Better, &crossword0, &mut best_crosswords);
+        assert_eq!(1, best_crosswords.len());
         assert!(best_crosswords.contains(&crossword0));
     }
 
