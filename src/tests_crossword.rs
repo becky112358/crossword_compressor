@@ -15,10 +15,10 @@ mod tests {
     }
 
     #[test]
-    fn test_crossword_crossable_letters() {
+    fn test_crossword_get_crossable_letters() {
         let crossword = helper_get_generic_crossword();
 
-        let crossable_letters = crossword.crossable_letters();
+        let crossable_letters = crossword.get_crossable_letters();
 
         assert_eq!(vec![('a', [5, 6], Direction::Across),
                         ('l', [5, 7], Direction::Across),

@@ -37,12 +37,11 @@ impl Direction {
         let output = match self { Direction::Across => Direction::Down, Direction::Down => Direction::Across, };
         return output;
     }
-
 }
 
 impl Crossword<'_> {
     // todo This should return an iterator rather than a vector
-    pub fn crossable_letters(&self) -> Vec<(char, [i32; 2], Direction)> {
+    pub fn get_crossable_letters(&self) -> Vec<(char, [i32; 2], Direction)> {
 
         let mut output = Vec::new();
 
@@ -166,7 +165,7 @@ fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
     return position_end;
 }
 
-pub fn initialise_crossword<'a>(words: &'a Vec<String>) -> Crossword<'a> {
+pub fn crossword_initialise<'a>(words: &'a Vec<String>) -> Crossword<'a> {
     let mut word_cross_vec = Vec::with_capacity(words.len());
 
     for index in 0..words.len() {

@@ -13,12 +13,12 @@ enum Comparison {
     SeedDuplicate,
 }
 
-pub fn compare_options<'a>(
+pub fn options_compare<'a>(
     letter_map: &HashMap<char, Vec<WordAndLetter>>,
     crossword: &mut Crossword<'a>,
     best_crosswords: &mut Vec<Crossword<'a>>) {
 
-    for (letter, position, direction) in crossword.crossable_letters() {
+    for (letter, position, direction) in crossword.get_crossable_letters() {
         if let Some(crossable_words) = letter_map.get(&letter) {
             for word_and_letter in crossable_words {
                 if insert_word(&position, direction, &word_and_letter, crossword) {
@@ -29,7 +29,7 @@ pub fn compare_options<'a>(
                     } else if crossword.all_words_crossed() {
                         add_crossword(crossword_status, crossword, best_crosswords);
                     } else {
-                        compare_options(letter_map, crossword, best_crosswords);
+                        options_compare(letter_map, crossword, best_crosswords);
                     }
 
                     remove_word(&word_and_letter, crossword);

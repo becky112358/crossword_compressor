@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::crossword::{initialise_crossword, WordCross};
+    use crate::crossword::{crossword_initialise, WordCross};
     use crate::options::*;
 
     #[test]
@@ -36,7 +36,7 @@ mod tests {
     #[test]
     fn test_check_connecting_word() {
         let words = vec!["lonely".to_string()];
-        let crossword = initialise_crossword(&words);
+        let crossword = crossword_initialise(&words);
 
         assert!(check_connecting_word(3, 4, 0, Direction::Across, &crossword));
         assert!(check_connecting_word(3, 2, 0, Direction::Across, &crossword));
@@ -85,8 +85,8 @@ mod tests {
             "surprise".to_string(),
         ];
 
-        let mut crossword0 = initialise_crossword(&words);
-        let crossword1 = initialise_crossword(&words);
+        let mut crossword0 = crossword_initialise(&words);
+        let crossword1 = crossword_initialise(&words);
         let mut best_crosswords = vec![crossword1];
 
         crossword0.words[1].cross = Some(CrossData{ position: [2, -2], direction: Direction::Down, order: 1 });
@@ -121,8 +121,8 @@ mod tests {
             "words".to_string(),
         ];
 
-        let crossword0 = initialise_crossword(&words0);
-        let crossword1 = initialise_crossword(&words1);
+        let crossword0 = crossword_initialise(&words0);
+        let crossword1 = crossword_initialise(&words1);
 
         let mut best_crosswords = vec![];
 
