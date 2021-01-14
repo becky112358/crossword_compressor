@@ -15,6 +15,14 @@ mod tests {
     }
 
     #[test]
+    fn test_cross_data_get_position() {
+        let cross_data = CrossData {row: 5, start_point: 12, direction: Direction::Across, order: 6};
+        assert_eq!([12, 5], cross_data.get_position());
+        let cross_data = CrossData {row: 28, start_point: -100, direction: Direction::Down, order: 98};
+        assert_eq!([28, -100], cross_data.get_position());
+    }
+
+    #[test]
     fn test_crossword_get_crossable_letters() {
         let crossword = helper_get_generic_crossword();
 
