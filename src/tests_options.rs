@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::crossword::{initialise_crossword};
+    use crate::crossword::{initialise_crossword, WordCross};
     use crate::options::*;
 
     #[test]
@@ -180,6 +180,26 @@ mod tests {
         add_crossword(Comparison::AsGood, &crossword0, &mut best_crosswords);
         assert_eq!(2, best_crosswords.len());
         assert!(best_crosswords.contains(&crossword0));
+    }
+
+    #[test]
+    fn test_remove_word() {
+        let word_index = 0;
+        let word_and_letter = WordAndLetter {
+            word_index,
+            word: "lonesome",
+            letter: 'o',
+            letter_index: 5,
+            n_letters_after: 2,
+        };
+        let mut crossword = Crossword {
+            words: vec![WordCross {word: "lonesome",
+                                   cross: Some(CrossData {position: [3, 14], direction: Direction::Across, order: 0})}],
+        };
+
+        assert!(crossword.words[word_index].cross != None);
+        remove_word(&word_and_letter, &mut crossword);
+        assert!(crossword.words[word_index].cross == None);
     }
 }
 
