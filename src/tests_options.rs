@@ -4,6 +4,47 @@ mod tests {
     use crate::options::*;
 
     #[test]
+    fn test_insert_word_check_insertable() {
+        let mut crossword = Crossword {
+            words: vec![WordCross {word: "start", cross: Some(CrossData {row: -3,
+                                                                         start_point: -4,
+                                                                         direction: Direction::Across,
+                                                                         order: 1})},
+                        WordCross {word: "words", cross: Some(CrossData {row: -1,
+                                                                         start_point: -5,
+                                                                         direction: Direction::Down,
+                                                                         order: 0})},
+                        WordCross {word: "new", cross: None },
+                        WordCross {word: "unaddable", cross: None },
+                       ]
+        };
+        let crossword_initial = crossword.clone();
+
+        let word = WordAndLetter { word_index: 1, word: "words", letter: 's', letter_index: 4, n_letters_after: 0 };
+        assert!(!insert_word(-4, -3, Direction::Down, &word, &mut crossword));
+        assert_eq!(crossword_initial, crossword);
+
+        let word = WordAndLetter { word_index: 3, word: "unaddable", letter: 'd', letter_index: 3, n_letters_after: 5 };
+        assert!(!check_insertable(-2, -4, Direction::Across, &word, &crossword));
+        assert!(!insert_word(-2, -1, Direction::Across, &word, &mut crossword));
+        assert_eq!(crossword_initial, crossword);
+
+        let word = WordAndLetter { word_index: 3, word: "unaddable", letter: 'a', letter_index: 5, n_letters_after: 3 };
+        assert!(!check_insertable(-2, -8, Direction::Down, &word, &crossword));
+        assert!(!insert_word(-2, -3, Direction::Down, &word, &mut crossword));
+        assert_eq!(crossword_initial, crossword);
+
+        let word = WordAndLetter { word_index: 2, word: "new", letter: 'w', letter_index: 2, n_letters_after: 0 };
+        assert!(check_insertable(-5, -3, Direction::Across, &word, &crossword));
+        assert!(insert_word(-5, -1, Direction::Across, &word, &mut crossword));
+        assert!(crossword != crossword_initial);
+        assert!(crossword.words[2].cross != None);
+        assert_eq!(Some(CrossData {row: -5, start_point: -3, direction: Direction::Across, order: 2}),
+                   crossword.words[2].cross);
+
+    }
+
+    #[test]
     fn test_get_end_point() {
         assert_eq!(22, get_end_point(18, "hello"));
     }
