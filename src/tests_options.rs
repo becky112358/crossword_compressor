@@ -69,6 +69,97 @@ mod tests {
     }
 
     #[test]
+    fn test_compare_crosswords() {
+        let crossword_good0 = Crossword {
+            words: vec![WordCross {word: "alpha", cross: Some(CrossData {row: 0,
+                                                                         start_point: 5,
+                                                                         direction: Direction::Across,
+                                                                         order: 0,
+                                                                        })},
+                        WordCross {word: "bravoo", cross: Some(CrossData {row: 9,
+                                                                          start_point: -2,
+                                                                          direction: Direction::Down,
+                                                                          order: 1,
+                                                                         })},
+                        WordCross {word: "charlie", cross: None },
+                        WordCross {word: "dalta", cross: Some(CrossData {row: 6,
+                                                                         start_point: -2,
+                                                                         direction: Direction::Down,
+                                                                         order: 2,
+                                                                        })},
+                       ]
+        };
+        let crossword_good1 = Crossword {
+            words: vec![WordCross {word: "alpha", cross: Some(CrossData {row: 0,
+                                                                         start_point: 5,
+                                                                         direction: Direction::Across,
+                                                                         order: 0,
+                                                                        })},
+                        WordCross {word: "bravoo", cross: Some(CrossData {row: 9,
+                                                                          start_point: -2,
+                                                                          direction: Direction::Down,
+                                                                          order: 1,
+                                                                         })},
+                        WordCross {word: "charlie", cross: None },
+                        WordCross {word: "dalta", cross: Some(CrossData {row: 5,
+                                                                         start_point: -1,
+                                                                         direction: Direction::Down,
+                                                                         order: 2,
+                                                                        })},
+                       ]
+        };
+        let crossword_bad = Crossword {
+            words: vec![WordCross {word: "alpha", cross: Some(CrossData {row: 0,
+                                                                         start_point: 5,
+                                                                         direction: Direction::Across,
+                                                                         order: 0,
+                                                                        })},
+                        WordCross {word: "bravoo", cross: Some(CrossData {row: 9,
+                                                                          start_point: -2,
+                                                                          direction: Direction::Down,
+                                                                          order: 1,
+                                                                         })},
+                        WordCross {word: "charlie", cross: None },
+                        WordCross {word: "dalta", cross: Some(CrossData {row: 5,
+                                                                         start_point: -4,
+                                                                         direction: Direction::Down,
+                                                                         order: 2,
+                                                                        })},
+                       ]
+        };
+
+        let best_crosswords = vec![];
+        assert_eq!(Comparison::First, compare_crosswords(&crossword_good0, &best_crosswords));
+        assert_eq!(Comparison::First, compare_crosswords(&crossword_good1, &best_crosswords));
+        assert_eq!(Comparison::First, compare_crosswords(&crossword_bad, &best_crosswords));
+
+        let best_crosswords = vec![crossword_bad.clone()];
+        assert_eq!(Comparison::Better, compare_crosswords(&crossword_good0, &best_crosswords));
+        assert_eq!(Comparison::Better, compare_crosswords(&crossword_good1, &best_crosswords));
+
+        let best_crosswords = vec![crossword_good0.clone()];
+        assert_eq!(Comparison::AsGood, compare_crosswords(&crossword_good1, &best_crosswords));
+
+        let best_crosswords = vec![crossword_good1.clone()];
+        assert_eq!(Comparison::AsGood, compare_crosswords(&crossword_good0, &best_crosswords));
+
+        let best_crosswords = vec![crossword_good0.clone()];
+        assert_eq!(Comparison::Worse, compare_crosswords(&crossword_bad, &best_crosswords));
+
+        let best_crosswords = vec![crossword_good1.clone()];
+        assert_eq!(Comparison::Worse, compare_crosswords(&crossword_bad, &best_crosswords));
+
+        let best_crosswords = vec![crossword_good0.clone()];
+        assert_eq!(Comparison::SeedDuplicate, compare_crosswords(&crossword_good0, &best_crosswords));
+
+        let best_crosswords = vec![crossword_good1.clone()];
+        assert_eq!(Comparison::SeedDuplicate, compare_crosswords(&crossword_good1, &best_crosswords));
+
+        let best_crosswords = vec![crossword_bad.clone()];
+        assert_eq!(Comparison::SeedDuplicate, compare_crosswords(&crossword_bad, &best_crosswords));
+    }
+
+    #[test]
     fn test_is_duplicate() {
         let words = vec![
             "three".to_string(),

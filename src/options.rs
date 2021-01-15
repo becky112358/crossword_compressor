@@ -4,7 +4,7 @@ use crate::crossword::{CrossData, Crossword, Direction};
 use crate::letters::WordAndLetter;
 use crate::output::output_clear_message;
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 enum Comparison {
     First,
     Better,
