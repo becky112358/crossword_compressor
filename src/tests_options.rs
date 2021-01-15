@@ -1,7 +1,40 @@
 #[cfg(test)]
 mod tests {
     use crate::crossword::{crossword_initialise, WordCross};
+    use crate::letters::letters_get_map;
     use crate::options::*;
+
+    #[test]
+    fn test_options_compare() {
+        let words = vec!["small".to_string(), "collection".to_string(), "of".to_string(), "words".to_string(), ];
+        let letter_map = letters_get_map(&words);
+        let mut crossword = crossword_initialise(&words);
+        let mut best_crosswords = vec![];
+
+        let expected_crossword = Crossword {
+            words: vec![WordCross {word: "small", cross: Some(CrossData {row: 0,
+                                                                         start_point: 0,
+                                                                         direction: Direction::Across,
+                                                                         order: 0})},
+                        WordCross {word: "collection", cross: Some(CrossData {row: -3,
+                                                                              start_point: -1,
+                                                                              direction: Direction::Across,
+                                                                              order: 2})},
+                        WordCross {word: "of", cross: Some(CrossData {row: 7,
+                                                                      start_point: -3,
+                                                                      direction: Direction::Down,
+                                                                      order: 3})},
+                        WordCross {word: "words", cross: Some(CrossData {row: 0,
+                                                                         start_point: -4,
+                                                                         direction: Direction::Down,
+                                                                         order: 1})},
+                       ]
+        };
+
+        options_compare(&letter_map, &mut crossword, &mut best_crosswords);
+
+        assert_eq!(vec![expected_crossword], best_crosswords);
+    }
 
     #[test]
     fn test_insert_word_check_insertable() {

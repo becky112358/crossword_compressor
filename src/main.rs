@@ -10,12 +10,10 @@ use crate::output::output_clear_message;
 
 fn main() {
     let words_input = vec![
-        "beginning",
-        "hereby",
-        "exist",
+        "small",
+        "collection",
+        "of",
         "words",
-        "for",
-        "testing",
     ];
 
     let words = letters_to_lowercase(&words_input);
