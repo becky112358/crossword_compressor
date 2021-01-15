@@ -6,6 +6,10 @@ This code takes a selection of words and compresses them into a crossword.
 
 Rust
 
+## Method
+
+This code considers every possible way that the selection of words can be put together in a crossword. It outputs the 'best' crossword options. Crossword A is considered to be better than crossword B if the size of crossword A can fit inside the size of crossword B.
+
 ## Limitations
 
 * In src/crossword.rs, `get_crossable_letters()` returns a vector. It should return an iterator.
