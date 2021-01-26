@@ -52,7 +52,6 @@ impl CrossData {
 }
 
 impl Crossword<'_> {
-    // todo This should return an iterator rather than a vector
     pub fn get_crossable_letters(&self) -> Vec<(char, i32, i32, Direction)> {
 
         let mut output = Vec::new();
