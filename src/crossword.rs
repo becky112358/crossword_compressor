@@ -30,30 +30,31 @@ pub struct Crossword<'a> {
 
 impl Direction {
     pub fn index(&self) -> usize {
-        let index = match self { Direction::Across => X, Direction::Down => Y, };
-        return index;
+        match self {
+            Direction::Across => X,
+            Direction::Down => Y,
+        }
     }
 
     pub fn change(&self) -> Direction {
-        let output = match self { Direction::Across => Direction::Down, Direction::Down => Direction::Across, };
-        return output;
+        match self {
+            Direction::Across => Direction::Down,
+            Direction::Down => Direction::Across,
+        }
     }
 }
 
 impl CrossData {
     fn get_position(&self) -> [i32; 2] {
-        let position;
         match self.direction {
-            Direction::Across => position = [self.start_point, self.row],
-            Direction::Down => position = [self.row, self.start_point],
+            Direction::Across => [self.start_point, self.row],
+            Direction::Down => [self.row, self.start_point],
         }
-        return position;
     }
 }
 
 impl Crossword<'_> {
     pub fn get_crossable_letters(&self) -> Vec<(char, i32, i32, Direction)> {
-
         let mut output = Vec::new();
 
         for word in &self.words {
@@ -69,7 +70,7 @@ impl Crossword<'_> {
             }
         }
 
-        return output;
+        output
     }
 
     pub fn get_next_order(&self) -> usize {
@@ -81,7 +82,7 @@ impl Crossword<'_> {
         }
         next_order += 1;
 
-        return next_order;
+        next_order
     }
 
     pub fn get_min_max(&self) -> (usize, usize) {
@@ -90,26 +91,23 @@ impl Crossword<'_> {
         let min = x_width.min(y_width);
         let max = x_width.max(y_width);
 
-        return (min, max);
+        (min, max)
     }
 
     pub fn all_words_crossed(&self) -> bool {
-        let mut all_crossed = true;
-
         for word in &self.words {
             if word.cross == None {
-                all_crossed = false;
-                break;
+                return false;
             }
         }
 
-        return all_crossed;
+        true
     }
 
     pub fn print(&self) {
         let (x_low, x_width, y_low, y_width) = self.get_x_y_width();
 
-        let mut grid = vec![vec![' '; y_width+1]; x_width+1];
+        let mut grid = vec![vec![' '; y_width + 1]; x_width + 1];
 
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
@@ -117,18 +115,18 @@ impl Crossword<'_> {
                 let index = cross_data.direction.index();
 
                 for lr in word.word.chars() {
-                    grid[usize::try_from(position[X]-x_low).unwrap()][usize::try_from(position[Y]-y_low).unwrap()] = lr;
+                    grid[usize::try_from(position[X] - x_low).unwrap()]
+                        [usize::try_from(position[Y] - y_low).unwrap()] = lr;
                     position[index] += 1;
                 }
             }
-
         }
 
         for y in 0..y_width {
             for x in 0..x_width {
                 print!("{}", grid[x][y]);
             }
-            println!("");
+            println!();
         }
 
         println!("\n");
@@ -145,7 +143,7 @@ impl Crossword<'_> {
         for word in &self.words {
             if let Some(cross_data) = &word.cross {
                 let position_start = cross_data.get_position();
-                let position_end = get_position_end(&word.word, &cross_data);
+                let position_end = get_position_end(word.word, cross_data);
 
                 if first_word {
                     x_low = position_start[X];
@@ -165,7 +163,7 @@ impl Crossword<'_> {
         let x_width = usize::try_from(x_high - x_low + 1).unwrap();
         let y_width = usize::try_from(y_high - y_low + 1).unwrap();
 
-        return (x_low, x_width, y_low, y_width);
+        (x_low, x_width, y_low, y_width)
     }
 }
 
@@ -174,17 +172,14 @@ fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
     let index = cross_data.direction.index();
     position_end[index] += word.len() as i32 - 1;
 
-    return position_end;
+    position_end
 }
 
-pub fn crossword_initialise<'a>(words: &'a Vec<String>) -> Crossword<'a> {
+pub fn crossword_initialise(words: &[String]) -> Crossword {
     let mut word_cross_vec = Vec::with_capacity(words.len());
 
-    for index in 0..words.len() {
-        let word_cross = WordCross {
-            word: &words[index],
-            cross: None,
-        };
+    for word in words {
+        let word_cross = WordCross { word, cross: None };
         word_cross_vec.push(word_cross);
     }
 
@@ -196,16 +191,11 @@ pub fn crossword_initialise<'a>(words: &'a Vec<String>) -> Crossword<'a> {
     };
     word_cross_vec[0].cross = Some(first_word_cross_data);
 
-    let crossword = Crossword {
+    Crossword {
         words: word_cross_vec,
-    };
-
-    return crossword;
+    }
 }
-
 
 #[cfg(test)]
 #[path = "./tests_crossword.rs"]
 mod tests_crossword;
-
-

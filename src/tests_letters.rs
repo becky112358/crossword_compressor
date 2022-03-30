@@ -4,11 +4,7 @@ mod tests {
 
     #[test]
     fn test_letters_to_lowercase() {
-        let words_input = vec![
-            "ALL_UPPERCASE",
-            "mIXeD casE",
-            "all_lowercase",
-        ];
+        let words_input = vec!["ALL_UPPERCASE", "mIXeD casE", "all_lowercase"];
 
         let words_output = letters_to_lowercase(&words_input);
 
@@ -37,7 +33,10 @@ mod tests {
         helper_word_and_letter_vector_contains_word_index(&i_entry, 1);
 
         if let Some(_) = letter_map.get(&'z') {
-            assert!(false, "No words contain letter z, but the letter map contains a z entry.");
+            assert!(
+                false,
+                "No words contain letter z, but the letter map contains a z entry."
+            );
         }
 
         let e_entry = letter_map.get(&'e').unwrap();
@@ -46,7 +45,10 @@ mod tests {
         helper_word_and_letter_vector_contains_word_index(&e_entry, 5);
     }
 
-    fn helper_word_and_letter_vector_contains_word_index(word_and_letters: &Vec<WordAndLetter>, word_index: usize) {
+    fn helper_word_and_letter_vector_contains_word_index(
+        word_and_letters: &Vec<WordAndLetter>,
+        word_index: usize,
+    ) {
         let mut contains = false;
 
         for word_and_letter in word_and_letters {
@@ -59,4 +61,3 @@ mod tests {
         assert_eq!(true, contains);
     }
 }
-

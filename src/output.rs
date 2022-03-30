@@ -1,11 +1,10 @@
-
 const SCREEN_WIDTH: usize = 80;
 
 pub fn output_clear_message(message: &str) {
     output_stars();
     println!("{}", message);
     output_stars();
-    println!("");
+    println!();
 }
 
 fn output_stars() {
@@ -14,4 +13,3 @@ fn output_stars() {
     }
     println!();
 }
-

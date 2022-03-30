@@ -1,22 +1,14 @@
-
 mod crossword;
 use crate::crossword::crossword_initialise;
 mod letters;
-use crate::letters::{letters_to_lowercase, letters_get_map};
+use crate::letters::{letters_get_map, letters_to_lowercase};
 mod options;
 use crate::options::options_compare;
 mod output;
 use crate::output::output_clear_message;
 
 fn main() {
-    let words_input = vec![
-        "hereby",
-        "exist",
-        "words",
-        "for",
-        "sample",
-        "output",
-    ];
+    let words_input = vec!["hereby", "exist", "words", "for", "sample", "output"];
 
     let words = letters_to_lowercase(&words_input);
 
@@ -32,4 +24,3 @@ fn main() {
         crossword.print();
     }
 }
-
