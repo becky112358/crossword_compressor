@@ -25,7 +25,7 @@ pub fn letters_get_map(words: &[String]) -> HashMap<char, Vec<WordAndLetter>> {
                 n_letters_after: word.len() - letter_index - 1,
             };
 
-            let words_with_letter = letter_map.entry(letter).or_insert(vec![]);
+            let words_with_letter = letter_map.entry(letter).or_default();
             words_with_letter.push(word_and_letter);
         }
     }

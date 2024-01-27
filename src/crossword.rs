@@ -3,13 +3,13 @@ use std::convert::TryFrom;
 const X: usize = 0;
 const Y: usize = 1;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Direction {
     Across,
     Down,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CrossData {
     pub row: i32,
     pub start_point: i32,
@@ -17,13 +17,13 @@ pub struct CrossData {
     pub order: usize,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct WordCross<'a> {
     pub word: &'a str,
     pub cross: Option<CrossData>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Crossword<'a> {
     pub words: Vec<WordCross<'a>>,
 }
@@ -96,7 +96,7 @@ impl Crossword<'_> {
 
     pub fn all_words_crossed(&self) -> bool {
         for word in &self.words {
-            if word.cross == None {
+            if word.cross.is_none() {
                 return false;
             }
         }
@@ -104,6 +104,7 @@ impl Crossword<'_> {
         true
     }
 
+    #[allow(clippy::needless_range_loop)]
     pub fn print(&self) {
         let (x_low, x_width, y_low, y_width) = self.get_x_y_width();
 
