@@ -1,5 +1,5 @@
-use crate::crossword::{crossword_initialise, WordCross};
-use crate::letters::letters_get_map;
+use crate::crossword::{self, WordCross};
+use crate::letters;
 
 use super::*;
 
@@ -11,8 +11,8 @@ fn test_options_compare() {
         "of".to_string(),
         "words".to_string(),
     ];
-    let letter_map = letters_get_map(&words);
-    let mut crossword = crossword_initialise(&words);
+    let letter_map = letters::get_map(&words);
+    let mut crossword = crossword::initialise(&words);
     let mut best_crosswords = vec![];
 
     let expected_crossword = Crossword {
@@ -62,7 +62,7 @@ fn test_options_compare() {
 }
 
 #[test]
-fn test_insert_word_check_insertable() {
+fn insert_word_check_insertable() {
     let mut crossword = Crossword {
         words: vec![
             WordCross {
@@ -378,7 +378,7 @@ fn test_check_same_direction() {
 #[test]
 fn test_check_connecting_word() {
     let words = vec!["lonely".to_string()];
-    let crossword = crossword_initialise(&words);
+    let crossword = crossword::initialise(&words);
 
     assert!(check_connecting_word(
         3,
@@ -650,8 +650,8 @@ fn test_is_duplicate() {
         "surprise".to_string(),
     ];
 
-    let mut crossword0 = crossword_initialise(&words);
-    let crossword1 = crossword_initialise(&words);
+    let mut crossword0 = crossword::initialise(&words);
+    let crossword1 = crossword::initialise(&words);
     let mut best_crosswords = vec![crossword1];
 
     crossword0.words[1].cross = Some(CrossData {
@@ -725,8 +725,8 @@ fn test_add_crossword() {
     let words0 = vec!["two".to_string(), "words".to_string()];
     let words1 = vec!["different".to_string(), "words".to_string()];
 
-    let crossword0 = crossword_initialise(&words0);
-    let crossword1 = crossword_initialise(&words1);
+    let crossword0 = crossword::initialise(&words0);
+    let crossword1 = crossword::initialise(&words1);
 
     let mut best_crosswords = vec![];
 

@@ -176,7 +176,7 @@ fn get_position_end(word: &str, cross_data: &CrossData) -> [i32; 2] {
     position_end
 }
 
-pub fn crossword_initialise(words: &[String]) -> Crossword {
+pub fn initialise(words: &[String]) -> Crossword {
     let mut word_cross_vec = Vec::with_capacity(words.len());
 
     for word in words {

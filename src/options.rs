@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::crossword::{CrossData, Crossword, Direction};
 use crate::letters::WordAndLetter;
-use crate::output::output_clear_message;
+use crate::output;
 
 #[derive(Debug, PartialEq)]
 enum Comparison {
@@ -262,7 +262,7 @@ fn add_crossword<'a>(
     best_crosswords: &mut Vec<Crossword<'a>>,
 ) {
     if comparison == Comparison::Better {
-        output_clear_message("Selection improved!");
+        output::clear_message("Selection improved!");
         while !best_crosswords.is_empty() {
             best_crosswords.pop();
         }

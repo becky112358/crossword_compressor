@@ -8,11 +8,11 @@ pub struct WordAndLetter<'a> {
     pub n_letters_after: usize,
 }
 
-pub fn letters_to_lowercase(words: &[&str]) -> Vec<String> {
+pub fn to_lowercase(words: &[&str]) -> Vec<String> {
     return words.iter().map(|x| x.to_lowercase()).collect();
 }
 
-pub fn letters_get_map(words: &[String]) -> HashMap<char, Vec<WordAndLetter>> {
+pub fn get_map(words: &[String]) -> HashMap<char, Vec<WordAndLetter>> {
     let mut letter_map: HashMap<char, Vec<WordAndLetter>> = HashMap::new();
 
     for (word_index, word) in words.iter().enumerate() {

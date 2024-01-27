@@ -1,10 +1,10 @@
 use super::*;
 
 #[test]
-fn test_letters_to_lowercase() {
+fn letters_to_lowercase() {
     let words_input = vec!["ALL_UPPERCASE", "mIXeD casE", "all_lowercase"];
 
-    let words_output = letters_to_lowercase(&words_input);
+    let words_output = to_lowercase(&words_input);
 
     assert_eq!("all_uppercase".to_string(), words_output[0]);
     assert_eq!("mixed case".to_string(), words_output[1]);
@@ -12,7 +12,7 @@ fn test_letters_to_lowercase() {
 }
 
 #[test]
-fn test_letters_get_map() {
+fn letters_get_map() {
     let words = vec![
         "the".to_string(),
         "quick".to_string(),
@@ -24,7 +24,7 @@ fn test_letters_get_map() {
         "dog".to_string(),
     ];
 
-    let letter_map = letters_get_map(&words);
+    let letter_map = get_map(&words);
 
     let i_entry = letter_map.get(&'i').unwrap();
     assert_eq!(1, i_entry.len());

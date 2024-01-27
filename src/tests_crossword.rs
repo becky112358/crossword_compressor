@@ -1,19 +1,19 @@
 use super::*;
 
 #[test]
-fn test_direction_index() {
+fn direction_index() {
     assert_eq!(X, Direction::Across.index());
     assert_eq!(Y, Direction::Down.index());
 }
 
 #[test]
-fn test_direction_change() {
+fn direction_change() {
     assert_eq!(Direction::Down, Direction::Across.change());
     assert_eq!(Direction::Across, Direction::Down.change());
 }
 
 #[test]
-fn test_cross_data_get_position() {
+fn cross_data_get_position() {
     let cross_data = CrossData {
         row: 5,
         start_point: 12,
@@ -31,7 +31,7 @@ fn test_cross_data_get_position() {
 }
 
 #[test]
-fn test_crossword_get_crossable_letters() {
+fn crossword_get_crossable_letters() {
     let crossword = helper_get_generic_crossword();
 
     let crossable_letters = crossword.get_crossable_letters();
@@ -59,19 +59,19 @@ fn test_crossword_get_crossable_letters() {
 }
 
 #[test]
-fn test_crossword_get_next_order() {
+fn crossword_get_next_order() {
     let crossword = helper_get_generic_crossword();
     assert_eq!(3, crossword.get_next_order());
 }
 
 #[test]
-fn test_crossword_get_min_max() {
+fn crossword_get_min_max() {
     let crossword = helper_get_generic_crossword();
     assert_eq!((5, 7), crossword.get_min_max());
 }
 
 #[test]
-fn test_crossword_all_words_crossed() {
+fn crossword_all_words_crossed() {
     let mut crossword = helper_get_generic_crossword();
     assert!(!crossword.all_words_crossed());
 
@@ -97,7 +97,7 @@ fn test_crossword_all_words_crossed() {
 }
 
 #[test]
-fn test_crossword_get_x_y_width() {
+fn crossword_get_x_y_width() {
     let crossword = helper_get_generic_crossword();
     assert_eq!((1, 7, 6, 5), crossword.get_x_y_width());
 }

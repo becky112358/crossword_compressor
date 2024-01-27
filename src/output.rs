@@ -1,6 +1,6 @@
 const SCREEN_WIDTH: usize = 80;
 
-pub fn output_clear_message(message: &str) {
+pub fn clear_message(message: &str) {
     output_stars();
     println!("{}", message);
     output_stars();

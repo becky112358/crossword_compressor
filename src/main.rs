@@ -1,25 +1,22 @@
 mod crossword;
-use crate::crossword::crossword_initialise;
 mod letters;
-use crate::letters::{letters_get_map, letters_to_lowercase};
 mod options;
 use crate::options::options_compare;
 mod output;
-use crate::output::output_clear_message;
 
 fn main() {
     let words_input = vec!["hereby", "exist", "words", "for", "sample", "output"];
 
-    let words = letters_to_lowercase(&words_input);
+    let words = letters::to_lowercase(&words_input);
 
-    let letter_map = letters_get_map(&words);
+    let letter_map = letters::get_map(&words);
 
-    let mut crossword = crossword_initialise(&words);
+    let mut crossword = crossword::initialise(&words);
 
     let mut best_options = vec![];
     options_compare(&letter_map, &mut crossword, &mut best_options);
 
-    output_clear_message(&format!("{} excellent options", best_options.len()));
+    output::clear_message(&format!("{} excellent options", best_options.len()));
     for crossword in &best_options {
         crossword.print();
     }
